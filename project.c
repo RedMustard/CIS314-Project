@@ -14,13 +14,21 @@
 // Forward-declaring functions:
 
 int ALU();
-
+//Various MIPS instruction functions
+int storeWord(int , int);
+int setOnLessThan(int , int);
+int setOnGreaterThan(int , int );
 // Driver function
+//Control logic/unit
 
 int main(){
-    long instMem[32];                       // Memory for holding instructions (Is it necessary if we are reading a file?)
-    long storeMem[32];                      // Actual memory storage (What size?)
-    long cache[32];                         // 32 x 32-bit elements = 32 "registers" = data cache
+    //These arrays can be declared as globals
+    //so we can manipulate them easily by other functions
+    //without descoping
+    char * instMem[32];                      // Memory for holding instructions (Is it necessary if we are reading a file?)
+                                            //YES It is necessary, we will turn each line into a string and place that string into the instruction array
+    int storeMem[32];                      // Actual memory storage (What size?)
+    int registryCache[32];                         // 32 x 32-bit elements = 32 "registers" = data cache
     for (i = 0, i < 32, i++) {
         instMem[i] = 0;                     // initialize instruction memory to 0
         storeMem[i] = 0;                    // initialize memory to 0
@@ -28,7 +36,8 @@ int main(){
     }
 }
 
-int ALU(
+//Dont need all these add functions. When we fetch and decode we can just say if (add, addi, or addiu) call our add function
+/*int ALU(
         // Adds two registers and stores the result in a register
         // $d = $s + $t;
         int add (long d, long s, long t) {
@@ -44,8 +53,53 @@ int ALU(
         // $t = $s + imm
         int addiu (long d, long s, int u) {
             // addiu $t, $s, imm
-        }
+        }*/
         
+
+int ALU(int arg1, int arg2, char* command)
+{
+    int result = 0;
+    if(strcmp(command, "add") == 0)
+    {
+        result = arg1 + arg2;
+        return result;
+    }
+    else if(strcmp(command, "subtract") == 0)
+    {
+        result = arg1 - arg2;
+        return result;
+    }
+    return 0;
+}
+    
+//Various MIPS commands
+int storeWord(int word, int index)
+{
+    return 0;
+}
+        int setOnLessThan(int arg1, int arg2)
+{
+    if(arg1 >= arg2)
+    {
+        return 0;
+    }
+    else if(arg1 < arg2)
+    {
+        return 1;
+    }
+    
+}
+        int setOnGreaterThan(int arg1, int arg2)
+{
+    if(arg1 <= arg2)
+    {
+        return 0;
+    }
+    else if (arg1 > arg2)
+    {
+        return 1;
+    }
+}
 /*
 Description:
     Adds two registers and stores the result in a register

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C32198941BF015F0005B83FC /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = C32198931BF015F0005B83FC /* main.c */; };
+		C321989B1BF0160E005B83FC /* project.c in Sources */ = {isa = PBXBuildFile; fileRef = C321989A1BF0160E005B83FC /* project.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		C32198901BF015F0005B83FC /* CIS314-Cody */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "CIS314-Cody"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C32198931BF015F0005B83FC /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		C321989A1BF0160E005B83FC /* project.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = project.c; path = ../project.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +43,7 @@
 		C32198871BF015F0005B83FC = {
 			isa = PBXGroup;
 			children = (
+				C321989A1BF0160E005B83FC /* project.c */,
 				C32198921BF015F0005B83FC /* CIS314-Cody */,
 				C32198911BF015F0005B83FC /* Products */,
 			);
@@ -119,6 +122,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C32198941BF015F0005B83FC /* main.c in Sources */,
+				C321989B1BF0160E005B83FC /* project.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

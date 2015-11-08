@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F69908CE1BF009FD00DC157C"
-               BuildableName = "CIS314-Project"
-               BlueprintName = "CIS314-Project"
+               BuildableName = "CIS314-Project-Travis"
+               BlueprintName = "CIS314-Project-Travis"
                ReferencedContainer = "container:CIS314-Project-Travis.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -33,8 +33,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F69908CE1BF009FD00DC157C"
-            BuildableName = "CIS314-Project"
-            BlueprintName = "CIS314-Project"
+            BuildableName = "CIS314-Project-Travis"
+            BlueprintName = "CIS314-Project-Travis"
             ReferencedContainer = "container:CIS314-Project-Travis.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -53,8 +53,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F69908CE1BF009FD00DC157C"
-            BuildableName = "CIS314-Project"
-            BlueprintName = "CIS314-Project"
+            BuildableName = "CIS314-Project-Travis"
+            BlueprintName = "CIS314-Project-Travis"
             ReferencedContainer = "container:CIS314-Project-Travis.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -72,8 +72,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F69908CE1BF009FD00DC157C"
-            BuildableName = "CIS314-Project"
-            BlueprintName = "CIS314-Project"
+            BuildableName = "CIS314-Project-Travis"
+            BlueprintName = "CIS314-Project-Travis"
             ReferencedContainer = "container:CIS314-Project-Travis.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F69908DA1BF00A0E00DC157C /* project.c in Sources */ = {isa = PBXBuildFile; fileRef = F69908D91BF00A0E00DC157C /* project.c */; };
+		F69908DB1BF0191800DC157C /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = F69908D21BF009FD00DC157C /* main.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,8 +25,8 @@
 
 /* Begin PBXFileReference section */
 		F69908CF1BF009FD00DC157C /* CIS314-Project-Travis */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "CIS314-Project-Travis"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F69908D21BF009FD00DC157C /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = main.c; path = "../CIS314-Project-Travis/main.c"; sourceTree = "<group>"; };
-		F69908D91BF00A0E00DC157C /* project.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = project.c; path = "../CIS314-Project-Travis/project.c"; sourceTree = "<group>"; };
+		F69908D21BF009FD00DC157C /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = main.c; path = "CIS314-Project-Travis/main.c"; sourceTree = "<group>"; };
+		F69908D91BF00A0E00DC157C /* project.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = project.c; path = "CIS314-Project-Travis/project.c"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +121,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F69908DB1BF0191800DC157C /* main.c in Sources */,
 				F69908DA1BF00A0E00DC157C /* project.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -237,6 +239,7 @@
 				F69908D81BF009FD00DC157C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

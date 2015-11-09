@@ -36,83 +36,17 @@ int main(int argc, const char * argv[]) {
     }
     
 
-
     while (fgets(line, line_size, in_file) != NULL)  {
-//        printf(line);
-//        strcat(INSTARRAY[i], line);
         lineArray[i] = malloc(strlen(line));
         strcpy(lineArray[i], line);
-        printf("%s", lineArray[i]);
-//        printf(INSTARRAY[i]);
         i++;
     }
 //    free(line);
-//    for (int q = 0; q < sizeof(INSTARRAY); q++) {
-//        printf(INSTARRAY[q]);
-//    }
+    
+    for (int q = 0; q < MAX_SIZE; q++) {
+        printf("%s", lineArray[q]);
+    }
 
     return 0;
     
 }
-
-    
-    
-    
-    
-//    //while fgets does not fail to scan a line
-//    while(fgets(line, sizeof(line), in_file) != NULL) {
-////        printf("Test");
-////        printf("%s", line);
-//        INSTARRAY[i++] = line;
-//        printf("%s", INSTARRAY[i]);
-//    }
-    
-//    printf("While done\n");
-    
-//    for (int q = 0; q < sizeof(INSTARRAY); q++) {
-//        printf("%s", INSTARRAY[q]);
-//    }
-//        if(sscanf(line, "%[^;];%[^;];%lf;%d", itemCode, item, price, quantity) != 4) //If sscanf failed to scan everything from the scanned line
-            //%[^;] scans everything until a ';'
-            //%lf scans a double
-            //%d scans an int
-            //Better to use `"%49[^;];%49[^;];%lf;%d"` to prevent buffer overflows
-//        {
-//            printf("Bad line detected\n");
-//            exit(-1);                          //Exit the program
-//    }
-        //        printf("ItemCode=%s\n", itemCode);
-        //        printf("Item=%s\n", item);
-        //        printf("price=%f\n", price);
-        //        printf("Quantity=%d\n\n", quantity);    //Print scanned items
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-        // Scan the file and add each integer to  array
-//    for (int q=0; q < strlen(instArray); q++) {
-//        fscanf(getline(&line, &len, in_file), "%c", &instArray[q]);
-//        printf("%s", instArray[q]);
-        
-//    }
-    
-    
-    
-//    while ((read = getline(&line, &len, in_file)) != -1) {
-////        printf("Retrieved line of length %zu :\n", read);
-////        fscanf(line, "%s", &instArray[i++]);
-//        
-//        printf("%s", line);
-//    }
-    
-

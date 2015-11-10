@@ -12,17 +12,22 @@
 #include <ctype.h>
 #include <math.h>
 #define ARR_SIZE = 10;
-
+int memoryCommands(char * , int , int );
+int registerWriteBack(int , int );
+int registerArray[];
+int mainMemory[];
+char * labelArray[];
+int labelValueArray[];
+char * label;
+//Control Logic
 int main(int argc, const char * argv[])
 {
-    int arr[5] = {1,2,3,4,5};
    
-    char * command = "add";
-    printf("%d",ALU(arr[0], arr[1], command));
 
     return 0;
 }
-int ALU(int arg1, int arg2, char* command, char * label)
+
+int ALU(int arg1, int arg2, char * command)
 {
     char * labelArray[10];
     int result = 0;
@@ -47,6 +52,7 @@ int ALU(int arg1, int arg2, char* command, char * label)
     //Division
     else if(strcmp(command, "div") == 0 || strmp(command, "divi") == 0)
     {
+        
         result = arg1/arg2;
         return result;
     }
@@ -60,10 +66,11 @@ int ALU(int arg1, int arg2, char* command, char * label)
             {   //Finds correct label, and then runs program starting at given index
                 if(strcmp(labelArray[i], label) == 0)
                 {
-                    return fetchDecode(i);
+                    int temp = labelValueArray[i];
+                    fetchDecode(temp);
+                    return 1;
                 }
-                else
-                    return 0;
+                
             }
             return 1;
         }
@@ -77,7 +84,6 @@ int ALU(int arg1, int arg2, char* command, char * label)
     {
         if(arg1 == arg2)
         {
-            
             return 0;
         }
         else if(arg1 != arg2)
@@ -87,10 +93,11 @@ int ALU(int arg1, int arg2, char* command, char * label)
             {   //Finds correct label, and then runs program starting at given index
                 if(strcmp(labelArray[i], label) == 0)
                 {
-                    return fetchDecode(i);
+                    int temp = labelValueArray[i];
+                    fetchDecode(temp);
+                    return 1;
                 }
-                else
-                    return 0;
+                
             }
 
             return 1;
@@ -103,12 +110,63 @@ int ALU(int arg1, int arg2, char* command, char * label)
         {
             return 1;
         }
-        return 2;
+        return 0;
     }
-    return result;
+
+    
+    return 1;
 }
-int memoryCommands()
+//SW/LW
+int memoryCommands(char * command, int targetRegister, int memoryIndex)
 {
+    if(strcmp(command, "sw") == 0)
+    {
+        mainMemory[memoryIndex] = registerArray[targetRegister];
+    }
+    else if(strcmp(command, "lw") == 0)
+    {
+        registerArray[targetRegister] =  mainMemory[memoryIndex];
+    }
+    else if(strcmp(command, "j"))
+    {
+        for(int i = 0; i < 10; i++)
+        {   //Finds correct label, and then runs program starting at given index
+            if(strcmp(labelArray[i], label) == 0)
+            {
+                int temp = labelValueArray[i];
+                fetchDecode(temp);
+                return 1;
+            }
+            
+        }
+        
+        return 1;
+    }
+    else if(strcmp(command, "jal")==0)
+    {
+        for(int i = 0; i < 10; i++)
+        {   //Finds correct label, and then runs program starting at given index
+            if(strcmp(labelArray[i], label) == 0)
+            {
+               
+                int temp = labelValueArray[i];
+                registerArray[31] = temp;
+                fetchDecode(temp);
+                return 1;
+            }
+            
+        }
+    }
+    else if(strcmp(command, "jr") == 0)
+    {
+        fetchDecode(registerArray[31]+1);
+    }
+    
+    return 0;
+}
+int registerWriteBack(int targetRegister, int value)
+{
+    registerArray[targetRegister] = value;
     
     return 0;
 }

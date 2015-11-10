@@ -24,7 +24,7 @@
 
 /* Begin PBXFileReference section */
 		27074C461BF0190D0071F237 /* Decode */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Decode; sourceTree = BUILT_PRODUCTS_DIR; };
-		27074C491BF0190D0071F237 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		27074C491BF0190D0071F237 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; usesTabs = 1; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -237,6 +237,7 @@
 				27074C4F1BF0190D0071F237 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

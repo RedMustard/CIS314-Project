@@ -14,8 +14,8 @@
 #define MAX_SIZE 201
 
 char *INSTRUCTIONS[MAX_SIZE]; // Processed instructions from 'in_file' (Up to 200 max instructions)
-char *LABELS[10];             // Labels from processed instructions
-int LABELLINE[10];            // Line number where the label was found
+char *LABELS[20];             // Labels from processed instructions
+int LABELLINE[20];            // Line number where the label was found
 
 void fileProcess(FILE*);
 
@@ -44,6 +44,8 @@ void fileProcess(FILE*in_file) {
     
     char *label;  // Token for labels
     char *inst;   // Token for instructions
+    char *inst2;
+        char *lab2;
     
     int i = 0;    // Counter
     int x = 0;    // Counter
@@ -69,8 +71,8 @@ void fileProcess(FILE*in_file) {
         }
     } // End while
     
-    free(line);         // Deallocate memory used by 'line'
-    fclose(in_file);    // Close 'in_file'
+    free(line);         // Done with 'line' now, so deallocate the memory
+    fclose(in_file);    // Done with 'in_file_ now, so close it
 /////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////// PRINT LINEARRAY /////////////////////////
@@ -93,11 +95,12 @@ void fileProcess(FILE*in_file) {
         // If the label has a ':' in it, add to LABELS and line number to LABELLINE
         for (int j = 0; label[j] != NULL; j++) {
             if (label[j] == ':') {
+                label[j] = ' ';
                 LABELS[x] = malloc(strlen(label));
                 strcpy(LABELS[x], label);
                 LABELLINE[x++] = p;
-                printf("%s ", label);
-                printf("%d\n", p);
+//                printf("%s ", label);
+//                printf("%d\n", p);
             }
         } // End for
 //        printf("%s\n", label);
@@ -114,27 +117,31 @@ void fileProcess(FILE*in_file) {
 ///////// Removes all inline comments that start with #//////////
     x = 0;
     for (int r = 0; r < i; r++) {
-        inst = strtok(lineArray[r],"#\n");
+        lab2 = strtok(lineArray[r], " ");
+        inst = strtok(lineArray[r], ":");
+        
+//        lab2 = strtok(NULL,"#");
+//        printf("LABEL %s\n", lab2);
+//        printf("INST %s\n", inst);
         
         if (inst != NULL) {
-//            inst = strtok(NULL, "#");
+            inst2 = strtok(inst, "#");
             
-            INSTRUCTIONS[x] = malloc(30);
-            strcpy(INSTRUCTIONS[x], inst);
-//            printf("%s\n", inst);
+//            INSTRUCTIONS[x] = malloc(30);
+//            strcpy(INSTRUCTIONS[x], inst);
+//            printf("%s\n", lab2);
+            printf("%s\n", inst2);
             x++;
         }
 //        free(inst);
     }
 ////////////////////////////////////////////////////////////////
-    
-////////////////////// PRINT LINEARRAY /////////////////////////
-//    for (int q = 1; q < i; q++) {
-//        printf("%s\n", lineArray[q]);
-//    }
-////////////////////////////////////////////////////////////////
 
 ////////////////////// PRINT ARRAYS ////////////////////////////
+    for (int q = 1; q < i; q++) {
+//        printf("%s\n", lineArray[q]);
+    }
+//    printf("\n");
     for (int q = 0; LABELS[q] != NULL; q++) {
 //        printf("%s ", LABELS[q]);
 //        printf("%d\n", LABELLINE[q]);
@@ -145,5 +152,4 @@ void fileProcess(FILE*in_file) {
 //        printf("%s\n", INSTRUCTIONS[q]);
     }
 ///////////////////////////////////////////////////////////////
-    
 } // End fileParse

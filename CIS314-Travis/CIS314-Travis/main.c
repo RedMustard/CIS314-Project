@@ -38,6 +38,7 @@ int main(int argc, const char * argv[]) {
 void fileProcess(FILE*in_file) {
     char *lineArray[MAX_SIZE];      // Parsed lines from 'in_file' for use of parsing instructions
     char *labelArray[MAX_SIZE];     // Parsed lines from 'in_file' for use of parsing labels
+    char *instArray[MAX_SIZE];
     
     const size_t line_size = 301;   // Set buffer size limit for line lengths
     char *line = malloc(line_size);
@@ -115,10 +116,21 @@ void fileProcess(FILE*in_file) {
     
 
 ///////// Removes all inline comments that start with #//////////
+    
+    /////////////
+    // Get the label the same way as above
+    // if the string is NOT the label, I know it is the instruction
+    //
+    // Separately, get the rest of the instruction, as your code already does
+    // Combine the two into 1 string, while storing into INSTRUCTIONS
+    //
+    // Note: Remove commas
+    /////////////
+    
     x = 0;
     for (int r = 0; r < i; r++) {
-        lab2 = strtok(lineArray[r], " ");
-        inst = strtok(lineArray[r], ":");
+//        lab2 = strtok(lineArray[r], ":");
+        inst = strtok(lineArray[r], "");
         
 //        lab2 = strtok(NULL,"#");
 //        printf("LABEL %s\n", lab2);
@@ -130,7 +142,7 @@ void fileProcess(FILE*in_file) {
 //            INSTRUCTIONS[x] = malloc(30);
 //            strcpy(INSTRUCTIONS[x], inst);
 //            printf("%s\n", lab2);
-            printf("%s\n", inst2);
+            printf("%s\n", inst);
             x++;
         }
 //        free(inst);

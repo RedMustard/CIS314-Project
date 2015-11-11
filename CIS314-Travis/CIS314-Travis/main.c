@@ -11,17 +11,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_SIZE 100
+#define MAX_SIZE 201
 
-char *INSTARRAY[MAX_SIZE]; // Processed instructions from read file
-char *LABELARRAY[10];       // Labels from processed instructions
-int LABELLINE[10];         // Line number where the label was found
+char *INSTRUCTIONS[MAX_SIZE]; // Processed instructions from 'in_file' (Up to 200 max instructions)
+char *LABELS[10];             // Labels from processed instructions
+int LABELLINE[10];            // Line number where the label was found
 
 void fileProcess(FILE*);
 
 int main(int argc, const char * argv[]) {
     FILE *in_file;
-    in_file = fopen("tests/bubble.asm", "r");
+    in_file = fopen("tests/function.asm", "r");
     
     // If 'in_file' hasn't been initialized, stop execution
     if (in_file == NULL) {
@@ -29,149 +29,121 @@ int main(int argc, const char * argv[]) {
         exit (0);
     }
     
-    fileProcess(in_file); // Process 'in_file'
+    fileProcess(in_file);     // Send 'in_file' to be processed
     
     return 0;
 } // End main
 
+
 void fileProcess(FILE*in_file) {
-    char* lineArray[MAX_SIZE]; // Parsed lines from 'in_file'
-    const size_t line_size = 300;   // Set buffer size limit for line lengths
-    char* line = malloc(line_size);
+    char *lineArray[MAX_SIZE];      // Parsed lines from 'in_file' for use of parsing instructions
+    char *labelArray[MAX_SIZE];     // Parsed lines from 'in_file' for use of parsing labels
     
-    char* label;
-    char* inst;
-    char* reg0;
-    char* reg1;
-    char* reg2;
+    const size_t line_size = 301;   // Set buffer size limit for line lengths
+    char *line = malloc(line_size);
     
-    int i = 0; // Counter
-    int x = 0; // Counter
+    char *label;  // Token for labels
+    char *inst;   // Token for instructions
     
+    int i = 0;    // Counter
+    int x = 0;    // Counter
+    
+//////////////////////// WORKING - STRIPS INITIAL # LINES /////////////////////////
     // While a line exists in 'in_file', insert 'line' into 'lineArray[i]'
     while (fgets(line, line_size, in_file) != NULL)  {
-        lineArray[i] = malloc(strlen(line));
         
-        // Strip all lines that begin with #. Add the rest to 'lineArray'
-        if (line[0] != '#') {
-            lineArray[i] = malloc(strlen(line));
-            strcpy(lineArray[i], line);
-            i++;
-        } else {
-            
+        // If a character in 'line' is a tab, make it a space
+        for (int l = 0; line[l] != NULL; l++) {
+            if (line[l] == '\t') {
+                line[l] = ' ';
+            }
         }
         
+        // Strip all lines that begin with #. Add the rest to 'lineArray'
+        if (line[0] != '#' && line[0] != '\n' && strlen(line) > 2) {
+            lineArray[i] = malloc(strlen(line));
+            labelArray[i] = malloc(strlen(line));
+            strcpy(lineArray[i], line);
+            strcpy(labelArray[i], line);
+            i++;
+        }
     } // End while
     
     free(line);         // Deallocate memory used by 'line'
     fclose(in_file);    // Close 'in_file'
-    
-    
-/////////////// PRINT ARRAY /////////////
-    for (int q = 0; q < i; q++) {
-        printf("%s", lineArray[q]);
+/////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////// PRINT LINEARRAY /////////////////////////
+    for (int q = 1; q < i; q++) {
+//                printf("%s", lineArray[q]);
     }
-////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
     
-    // Strip line in 'lineArray', located all label names/line numbers and store in respective arrays
-//    for (int p = 1; p < i; p++) {
-//        label = strtok(lineArray[p]," ");
-//        
-//        for (int j = 0; j < strlen(label); j++) {
-//            if (label[j] == ':') {
-//                LABELARRAY[x] = malloc(strlen(label));
-//                strcpy(LABELARRAY[x], label);
-//                LABELLINE[x++] = p-1;
-//            }
-//        } // End for
-//    } // End for
-/////////////////////////////////
-/////////LAST WORKING ON//////////
-//    for (int p = 1; p < i; p++) {
-//        inst = strtok(lineArray[p],",");
-//    
-//        while (inst != NULL) {
-//            printf("%s\n", inst);
-//            inst = strtok(NULL, ",");
-//
-//        }
-//    }
-/////////////////////////////////////
-
+    
+//////////////////// WORKING - LABEL/LINE NUMBER STRIP ////////////////////////////////
+    // Strip labels and corresponding line numbers from 'labelArray'. Store in LABELS and LABELLINE
+    for (int p = 0; p < i; p++) {
+        label = strtok(labelArray[p]," ");
         
-//        for (int j = 0; j < strlen(label); j++) {
-//            if (label[j] == ':') {
-//                LABELARRAY[x] = malloc(strlen(label));
-//                strcpy(LABELARRAY[x], label);
-//                LABELLINE[x++] = p-1;
-//            }
-//        } // End for
-//                printf("%s\n", inst[1]);
-//    } // End for
+        // Disregard the label/line if it's NULL or blank
+        if (label == NULL || strlen(label) <= 1) {
+            continue;
+        }
+        
+        // If the label has a ':' in it, add to LABELS and line number to LABELLINE
+        for (int j = 0; label[j] != NULL; j++) {
+            if (label[j] == ':') {
+                LABELS[x] = malloc(strlen(label));
+                strcpy(LABELS[x], label);
+                LABELLINE[x++] = p;
+                printf("%s ", label);
+                printf("%d\n", p);
+            }
+        } // End for
+//        printf("%s\n", label);
+    } // End for
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+////////////////////// PRINT LINEARRAY /////////////////////////
+    for (int q = 1; q < i; q++) {
+//        printf("%s\n", lineArray[q]);
+    }
+////////////////////////////////////////////////////////////////
+    
 
+///////// Removes all inline comments that start with #//////////
+    x = 0;
+    for (int r = 0; r < i; r++) {
+        inst = strtok(lineArray[r],"#\n");
+        
+        if (inst != NULL) {
+//            inst = strtok(NULL, "#");
+            
+            INSTRUCTIONS[x] = malloc(30);
+            strcpy(INSTRUCTIONS[x], inst);
+//            printf("%s\n", inst);
+            x++;
+        }
+//        free(inst);
+    }
+////////////////////////////////////////////////////////////////
     
-    
-    
-/////////////// PRINT LABELARRAY /////////////
-//    for (int q = 0; LABELARRAY[q] != NULL; q++) {
-//        printf("%s", LABELARRAY[q]);
-//        printf("%d\n", LABELLINE[q]);
+////////////////////// PRINT LINEARRAY /////////////////////////
+//    for (int q = 1; q < i; q++) {
+//        printf("%s\n", lineArray[q]);
 //    }
-//////////////////////////////////////////////
-/////////////// PRINT LABELARRAY /////////////
-//    for (int q = 0; LABELLINE[q] != NULL; q++) {
+////////////////////////////////////////////////////////////////
+
+////////////////////// PRINT ARRAYS ////////////////////////////
+    for (int q = 0; LABELS[q] != NULL; q++) {
+//        printf("%s ", LABELS[q]);
 //        printf("%d\n", LABELLINE[q]);
-//    }
-//////////////////////////////////////////////
+//
+    }
+//    printf("\n");
+    for (int q = 0; INSTRUCTIONS[q] != NULL; q++) {
+//        printf("%s\n", INSTRUCTIONS[q]);
+    }
+///////////////////////////////////////////////////////////////
     
 } // End fileParse
-
-
-
-
-
-
-
-
-/////////////// Strips all lines with # located anywhere
-//        for (int j = 0; j < strlen(line); j++) {
-//            if (line[j] == '#') {
-//                x = 1; // Raise flag
-//            }
-//        }
-//
-//        // If flag isn't raised, add line to array
-//        if (x == 0) {
-//            lineArray[i] = malloc(strlen(line));
-//            strcpy(lineArray[i], line);
-//            i++;
-//        }
-///////////////////////////////////////////////////////////
-
-
-
-
-
-//////////////// Skips #s ////////////////////
-//    for (int q = 0; q < i; q++) {
-//        x=0;
-//        while(lineArray[q][x] != '#' && lineArray[q] != NULL) {
-////            printf("%c", lineArray[q][x]);
-//            INSTARRAY[j] = malloc(strlen(lineArray[q]));
-//            strcpy(INSTARRAY[j], lineArray[q]);
-//            x++;
-//
-//        }
-//        j++;
-////        printf("\n");
-//    }
-/////////////////////////////////////////////////
-    
-    
-////////////////PRINT INSTARRAY////////////
-//    for (int r = 0; r < MAX_SIZE; r++) {
-//        if (INSTARRAY[r] != NULL) {
-//            printf("%s", INSTARRAY[r]);
-//        }
-//    }
-///////////////////////////////////////////

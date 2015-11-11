@@ -25,8 +25,7 @@ main:	addi	$s0, $0, 12		# Fib(4)
 # uses: $t0, $t1
 ##############################################################################################
 
-Fib:
-								# procedure prologue:
+Fib: 								# procedure prologue:
 		sw		$ra,($sp)		# save return address on stack, since recursive,
 		addi	$sp,$sp,-4		#   and decrement stack pointer
 		sw		$fp,($sp)		# save previous frame pointer on stack

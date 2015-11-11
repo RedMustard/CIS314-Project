@@ -13,10 +13,10 @@ static int ALU(int arg1, int arg2, char * command);
 
 
 // Global variables
-static char *instArray[5];
+static char *INSTRUCTIONS[5];
 static char *registerArray[32] = {"$0", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3", "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9", "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8", "$k0", "$k1", "$gp", "$sp", "$ra"};
 static int registerMemory[32] = {1};	// Register data cache
-static char *branchLabel;		// Current branch label (if beq/bne is called)
+static char *label;		// Current branch label (if beq/bne is called)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@ static char *branchLabel;		// Current branch label (if beq/bne is called)
 
 int main () {
     int index = 0;
-	instArray[0] = "sw $t0 16($at)";	// ~~~~~ FUNCTION TESTER ~~~~~
+	INSTRUCTIONS[0] = "sw $t0 16($at)";	// ~~~~~ FUNCTION TESTER ~~~~~
 	fetchDecode(index);
 }
 
@@ -40,12 +40,13 @@ static int fetchDecode(int index) {
 	int arg1 = 0;
 	int arg2 = 0;
 	int offset = 0;
-	char *dest;
 	int i = 0;
 	
 	instruction = (char *) malloc(32);
-	strcpy(instruction, instArray[index]);	// Make copy of current instruction
+	strcpy(instruction, INSTRUCTIONS[index]);	// Make copy of current instruction
 	command = strtok(instruction, " ");		// Get command argument from instruction (add, jal, etc.)
+	printf("%s\n", instruction);
+	printf("%s\n", command);
 	
 	// beq and bne: $s, $t, offset
 	if (   strcmp(command, "beq") == 0
@@ -64,7 +65,7 @@ static int fetchDecode(int index) {
 				break;
 			}
 		}
-		offset = (atoi(strtok(NULL, " ")))/4;	// Offset = ( MIPS offset / 4 )
+		label = (strtok(NULL, " "));	// Set global branch label
 		ALU(arg1, arg2, command);
 		return 0;
 	}
@@ -76,7 +77,7 @@ static int fetchDecode(int index) {
 		|| strcmp(command, "div") == 0
 		|| strcmp(command, "slt") == 0	)
 	{
-		dest = strtok(NULL, " ");			// Find destination (Cody: this is just to get to next arg, since you do NOT want destination of add, etc.
+		arg = strtok(NULL, " ");
 		arg = strtok(NULL, " ");
 		for (i = 0; i < 32; i++) {			// Get value stored in first register
 			if (strcmp(arg, registerArray[i]) == 0) {
@@ -91,7 +92,7 @@ static int fetchDecode(int index) {
 				break;
 			}
 		}
-		if (i = 32) { arg2 = atoi(arg); }	// If arg was immediate (not register), arg2 = immediate value
+		if (i == 32) { arg2 = atoi(arg); }	// If arg was immediate (not register), arg2 = immediate value
 		ALU(arg1, arg2, command);
 		return 0;
 	}
@@ -101,9 +102,9 @@ static int fetchDecode(int index) {
 		|| strcmp(command, "lw") == 0 )
 	{
 		arg = strtok(NULL, " ");
-		for (i = 0; i < 32; i++) {			// Get value stored in register (Cody: you probably actually want a register for load word? Do you want the register index for registerMemory?)
+		for (i = 0; i < 32; i++) {			// Get register INDEX
 			if (strcmp(arg, registerArray[i]) == 0) {
-				arg1 = registerMemory[i];
+				arg1 = i;
 				break;
 			}
 		}
@@ -121,28 +122,16 @@ static int fetchDecode(int index) {
 	
 	// j, jal: target
 	if (   strcmp(command, "j")   == 0
-		|| strcmp(command, "jal") == 0)
+		|| strcmp(command, "jal") == 0
+		|| strcmp(command, "jr")  == 0 )
 	{
-		branchLabel = strtok(NULL, " ");	// Get label for if branch is true, save globally
-		ALU(0,0, command);
-	}
-	// jr: register
-	if ( strcmp(command, "jr") == 0 )
-	{
-		arg = strtok(NULL, ")");
-		for (i = 0; i < 32; i++) {		// Get value (STRING!!) of register
-			if (strcmp(arg, registerArray[i]) == 0) {
-//				branchLabel = registerMemory[i]; // Cody: how do you want to store labels in (int array) register file?
-				break;
-			}
-		}
-		branchLabel = strtok(NULL, " ");
+		label = strtok(NULL, " ");	// Get label for if branch is true, save globally
 		ALU(0,0, command);
 	}
 	free(instruction);
 	return 0;
 }
-
+// Prints what ALU recieves. To test fetchDecode's outputs.
 static int ALU(int arg1, int arg2, char * command) {
 	printf("ALU:\n- arg1 = %d\n- arg2 = %d\n- command = %s\n", arg1, arg2, command);
 	return 0;

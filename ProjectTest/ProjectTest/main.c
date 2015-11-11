@@ -17,6 +17,8 @@ int ALU(int, int, char *);
 int fetchDecode(int );
 int registerWriteBack(int targetRegister, int value);
 int memoryCommands(char * command, int targetRegister, int memoryIndex);
+
+// Global Variables
 static char *INSTRUCTIONS[5] ={"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};
 static char *registerArray[32] = {"$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3", "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9", "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8", "$k0", "$k1", "$gp", "$sp", "$ra"};
 static int registerMemory[32] = {0, 1, 2,3,4,5,6,7,9};	// Register data cache
@@ -24,6 +26,13 @@ static char *label;		// Current branch label (if beq/bne is called)
 int mainMemory [300];
 int labelValueArray[5] = {3};
 char * labelArray[10]= {"label"};
+int next = 0;   // 0 = fetchDecode, 1 = ALU, 2 = regWriteBack, 3 = memCommands
+char *command;                      // Ie. add, jal, beq, mult, etc. of instruction
+int dest = 0;
+int arg1 = 0;
+int arg2 = 0;
+int offset = 0;
+int temp = 0;
 
 
 
@@ -31,17 +40,23 @@ int main ()
 {
     int index = 0;
     //INSTRUCTIONS[5] = {"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};	// ~~~~~ FUNCTION TESTER ~~~~~
-    fetchDecode(index);
+    if (next == 0) { fetchDecode(index); }
+    
+    if (next == 1) {
+        ALU(arg1, arg2, command);
+    }
+    if (next == 2) {
+        registerWriteBack(arg1, arg2);
+    }
+    if (next == 3) {
+    
+    
+    
 }
 
  int fetchDecode(int index) {
     char *arg;							// Token for strtok()
     char *instruction;					// Copy of instruction
-    char *command;                      // Ie. add, jal, beq, mult, etc. of instruction
-    int dest = 0;
-    int arg1 = 0;
-    int arg2 = 0;
-    int offset = 0;
     int i = 0;
     
     instruction = (char *) malloc(32);
@@ -67,7 +82,7 @@ int main ()
             }
         }
         label = (strtok(NULL, " "));	// Set global branch label
-        ALU(arg1, arg2, command);
+        next = 1;
     }
     
     // add, sub, mult, div, slt: $dest, $arg1, $arg2
@@ -99,8 +114,7 @@ int main ()
             }
         }
         if (i == 32) { arg2 = atoi(arg); }	// If arg was immediate (not register), arg2 = immediate value
-        int result = ALU(arg1, arg2, command);
-        registerWriteBack(dest, result);
+        next = 1;
     }
     
     // sw and lw: $t, offset($s)
@@ -131,11 +145,9 @@ int main ()
         || strcmp(command, "jr")  == 0 )
     {
         label = strtok(NULL, " ");	// Get label for if branch is true, save globally
-        memoryCommands(command, 0, 0);
+        next = 3;
     }
     free(instruction);
-     index ++;
-    fetchDecode(index);      // Call fetchDecode recursively
     return 0;
 }
 
@@ -205,8 +217,8 @@ int ALU(int arg1, int arg2, char * command)
             {   //Finds correct label, and then runs program starting at given index
                 if(strcmp(labelArray[i], label) == 0)
                 {
-                    int temp = labelValueArray[i];
-                    fetchDecode(temp);
+                    temp = labelValueArray[i];
+                    next = 1;
                     return 1;
                 }
                 
@@ -244,8 +256,8 @@ int memoryCommands(char * command, int targetRegister, int memoryIndex)
         {   //Finds correct label, and then runs program starting at given index
             if(strcmp(labelArray[i], label) == 0)
             {
-                int temp = labelValueArray[i];
-                fetchDecode(temp);
+                temp = labelValueArray[i];
+                next = 1;
                 return 1;
             }
             
@@ -262,7 +274,7 @@ int memoryCommands(char * command, int targetRegister, int memoryIndex)
                 
                 int temp = labelValueArray[i];
                 registerMemory[31] = temp;
-                fetchDecode(temp);
+                next = 0;
                 return 1;
             }
             

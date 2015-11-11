@@ -51,21 +51,21 @@ static int fetchDecode(int index) {
 	// beq and bne: $s, $t, offset
 	if (   strcmp(command, "beq") == 0
 		|| strcmp(command, "bne") == 0) {
-		arg = strtok(NULL, " ");
+		arg = strtok(NULL, ", ");
 		for (i = 0; i < 32; i++) {			// Find register value for 1st arg
 			if (strcmp(arg, registerArray[i]) == 0) {
 				arg1 = registerMemory[i];
 				break;
 			}
 		}
-		arg = strtok(NULL, " ");
+		arg = strtok(NULL, ", ");
 		for (i = 0; i < 32; i++) {			// Find register value for 2nd arg
 			if (strcmp(arg, registerArray[i]) == 0) {
 				arg2 = registerMemory[i];
 				break;
 			}
 		}
-		label = (strtok(NULL, " "));	// Set global branch label
+		label = (strtok(NULL, ", "));	// Set global branch label
 		ALU(arg1, arg2, command);
 		return 0;
 	}

@@ -13,13 +13,8 @@
 
 // Forward-declaring functions:
 
-int ALU();
-//Various MIPS instruction functions
-int storeWord(int , int);
-int setOnLessThan(int , int);
-int setOnGreaterThan(int , int );
-// Driver function
-//Control logic/unit
+int ALU(int, int, char *);
+
 
 int main(){
     //These arrays can be declared as globals
@@ -35,71 +30,150 @@ int main(){
         cache[i] = 0;                       // initialize all registers to 0
     }
 }
-
-//Dont need all these add functions. When we fetch and decode we can just say if (add, addi, or addiu) call our add function
-/*int ALU(
-        // Adds two registers and stores the result in a register
-        // $d = $s + $t;
-        int add (long d, long s, long t) {
-        }
-        
-        // Adds a register and a sign-extended, signed immediate value and stores the result in a register
-        // $t = $s + imm;
-        int addi (long d, long s, int s) {
-            // addi $t, $s, imm
-        }
-        
-        // Adds a register and a sign-extended, unsigned immediate value and stores the result in a register
-        // $t = $s + imm
-        int addiu (long d, long s, int u) {
-            // addiu $t, $s, imm
-        }*/
-        
-
-int ALU(int arg1, int arg2, char* command)
+int ALU(int arg1, int arg2, char * command)
 {
+    char * labelArray[10];
     int result = 0;
-    if(strcmp(command, "add") == 0)
+    //Add
+    if(strcmp(command, "add") == 0 || strcmp(command, "addi") == 0)
     {
         result = arg1 + arg2;
         return result;
     }
-    else if(strcmp(command, "subtract") == 0)
+    //Sub
+    else if(strcmp(command, "sub") == 0 || strcmp(command, "subi") == 0)
     {
         result = arg1 - arg2;
         return result;
     }
-    return 0;
-}
-    
-//Various MIPS commands
-int storeWord(int word, int index)
-{
-    return 0;
-}
-        int setOnLessThan(int arg1, int arg2)
-{
-    if(arg1 >= arg2)
+    //Multiplication
+    else if( strcmp(command, "mult") == 0 || strcmp(command, "multi") == 0)
     {
+        result = arg1 * arg2;
+        return result;
+    }
+    //Division
+    else if(strcmp(command, "div") == 0 || strmp(command, "divi") == 0)
+    {
+        
+        result = arg1/arg2;
+        return result;
+    }
+    //Branch if equal
+    else if(strcmp(command, "beq") == 0 )
+    {
+        if(arg1 == arg2)
+        {
+            //Loop through labelArray to find proper label
+            for(int i = 0; i < 10; i++)
+            {   //Finds correct label, and then runs program starting at given index
+                if(strcmp(labelArray[i], label) == 0)
+                {
+                    int temp = labelValueArray[i];
+                    fetchDecode(temp);
+                    return 1;
+                }
+                
+            }
+            return 1;
+        }
+        else if(arg1 != arg2)
+        {
+            return 0;
+        }
+    }
+    //Branch if not equal
+    else if(strcmp(command, "bne") == 0)
+    {
+        if(arg1 == arg2)
+        {
+            return 0;
+        }
+        else if(arg1 != arg2)
+        {
+            //Loop through labelArray to find proper label
+            for(int i = 0; i < 10; i++)
+            {   //Finds correct label, and then runs program starting at given index
+                if(strcmp(labelArray[i], label) == 0)
+                {
+                    int temp = labelValueArray[i];
+                    fetchDecode(temp);
+                    return 1;
+                }
+                
+            }
+            
+            return 1;
+        }
+    }
+    //Set less than commands
+    else if (strcmp(command, "slt") == 0 || strcmp(command, "sltu") == 0 || strcmp(command, "slti"))
+    {
+        if(arg1 < arg2)
+        {
+            return 1;
+        }
         return 0;
     }
-    else if(arg1 < arg2)
+    
+    
+    return 1;
+}
+//SW/LW
+int memoryCommands(char * command, int targetRegister, int memoryIndex)
+{
+    if(strcmp(command, "sw") == 0)
     {
+        mainMemory[memoryIndex] = registerArray[targetRegister];
+    }
+    else if(strcmp(command, "lw") == 0)
+    {
+        registerArray[targetRegister] =  mainMemory[memoryIndex];
+    }
+    else if(strcmp(command, "j"))
+    {
+        for(int i = 0; i < 10; i++)
+        {   //Finds correct label, and then runs program starting at given index
+            if(strcmp(labelArray[i], label) == 0)
+            {
+                int temp = labelValueArray[i];
+                fetchDecode(temp);
+                return 1;
+            }
+            
+        }
+        
         return 1;
+    }
+    else if(strcmp(command, "jal")==0)
+    {
+        for(int i = 0; i < 10; i++)
+        {   //Finds correct label, and then runs program starting at given index
+            if(strcmp(labelArray[i], label) == 0)
+            {
+                
+                int temp = labelValueArray[i];
+                registerArray[31] = temp;
+                fetchDecode(temp);
+                return 1;
+            }
+            
+        }
+    }
+    else if(strcmp(command, "jr") == 0)
+    {
+        fetchDecode(registerArray[31]+1);
     }
     
+    return 0;
 }
-        int setOnGreaterThan(int arg1, int arg2)
+int registerWriteBack(int targetRegister, int value)
 {
-    if(arg1 <= arg2)
-    {
-        return 0;
-    }
-    else if (arg1 > arg2)
-    {
-        return 1;
-    }
+    registerArray[targetRegister] = value;
+    
+    return 0;
 }
+//Dont need all these add functions. When we fetch and decode we can just say if (add, addi, or addiu) call our add function
 /*
 Description:
     Adds two registers and stores the result in a register

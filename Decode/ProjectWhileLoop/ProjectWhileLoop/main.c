@@ -1,39 +1,66 @@
-//  Read, process, and store MIPS instructions from user specified .asm file into array.
-//
-//  main.c
-//  CIS314-Travis
-//
-//  Created by Travis Barnes on 11/8/15.
-//  Copyright (c) 2015 Travis Barnes. All rights reserved.
-//
+/*
+ * Alex Geoffrey, Cody Ebert and Travis Barnes
+ * Alex: Thursday 2PM Lab Section
+ * CIS 314 Group Project Fall 2015
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <math.h>
 
 #define MAX_SIZE 201
 
+// Forward-declaring functions:
+void fileProcess(FILE*);
+int ALU(int, int, char *);
+int fetchDecode(int );
+int registerWriteBack(int targetRegister, int value);
+int memoryCommands(char * command, int targetRegister, int memoryIndex);
+
+// Global Variables
 char *INSTRUCTIONS[MAX_SIZE]; // Processed instructions from 'in_file' (Up to 200 max instructions)
 char *LABELS[20];             // Labels from processed instructions
 int LABELLINE[20];            // Line number where the label was found
+// static char *INSTRUCTIONS[5] ={"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};
+static char *registerArray[32] = {"$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3", "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9", "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8", "$k0", "$k1", "$gp", "$sp", "$ra"};
+static int registerMemory[32] = {};	// Register data cache
+static char *label;		// Current branch label (if beq/bne is called)
+int mainMemory [300];
+int length = sizeof(INSTRUCTIONS) / sizeof(INSTRUCTIONS[0]);
+int next = 0;   // 0 = fetchDecode, 1 = ALU, 2 = regWriteBack, 3 = memCommands
+char *command;                      // Ie. add, jal, beq, mult, etc. of instruction
+int instLine = 0;
+int dest = 0;
+int arg1 = 0;
+int arg2 = 0;
+int offset = 0;
+int result = 0;
 
-void fileProcess(FILE*);
 
 int main(int argc, const char * argv[]) {
     FILE *in_file;
-    in_file = fopen("tests/fibonacci.asm", "r");
+    in_file = fopen("tests/bubble.asm", "r");
     
     // If 'in_file' hasn't been initialized, stop execution
     if (in_file == NULL) {
         printf("Error Reading File\n");
         exit (0);
     }
-    
     fileProcess(in_file);     // Send 'in_file' to be processed
+    
+    // Start fetchDecode / ALU Ops
+    while (instLine < length) {
+        if (next == 0) { fetchDecode(instLine); instLine++; }
+        if (next == 1) { ALU(arg1, arg2, command); }
+        if (next == 2) { memoryCommands(command, arg1, instLine); }
+        if (next == 3) { registerWriteBack(arg1, result); }
+    }
     
     return 0;
 } // End main
-
 
 void fileProcess(FILE*in_file) {
     char *labelArray[MAX_SIZE];     // Parsed lines from 'in_file' for use of parsing labels
@@ -72,6 +99,7 @@ void fileProcess(FILE*in_file) {
             strcpy(labelArray[i], line);
             i++;
         }
+        
     } // End while
     
     free(line);         // Done with 'line' now, so deallocate the memory
@@ -90,9 +118,11 @@ void fileProcess(FILE*in_file) {
         for (int j = 0; label[j] != NULL; j++) {
             if (label[j] == ':') {
                 label[j] = ' ';
+                label = strtok(labelArray[p]," ");
                 LABELS[x] = malloc(strlen(label));
                 strcpy(LABELS[x], label);
                 LABELLINE[x++] = p;
+                
             }
         } // End for
     } // End for
@@ -130,56 +160,6 @@ void fileProcess(FILE*in_file) {
     } // End for
 } // End fileParse
 
-/*
- * Alex Geoffrey, Cody Ebert and Travis Barnes
- * Alex: Thursday 2PM Lab Section
- * CIS 314 Group Project Fall 2015
- *
- */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <math.h>
-
-// Forward-declaring functions:
-
-int ALU(int, int, char *);
-int fetchDecode(int );
-int registerWriteBack(int targetRegister, int value);
-int memoryCommands(char * command, int targetRegister, int memoryIndex);
-
-// Global Variables
-static char *INSTRUCTIONS[5] ={"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};
-static char *registerArray[32] = {"$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3", "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9", "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8", "$k0", "$k1", "$gp", "$sp", "$ra"};
-static int registerMemory[32] = {0, 1, 2,3,4,5,6,7,9};	// Register data cache
-static char *label;		// Current branch label (if beq/bne is called)
-int mainMemory [300];
-int labelValueArray[5] = {3};
-char * labelArray[10]= {"label"};
-int length = sizeof(INSTRUCTIONS) / sizeof(INSTRUCTIONS[0]);
-int next = 0;   // 0 = fetchDecode, 1 = ALU, 2 = regWriteBack, 3 = memCommands
-char *command;                      // Ie. add, jal, beq, mult, etc. of instruction
-int instLine = 0;
-int dest = 0;
-int arg1 = 0;
-int arg2 = 0;
-int offset = 0;
-int result = 0;
-
-
-int main ()
-{
-    //INSTRUCTIONS[5] = {"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};	// ~~~~~ FUNCTION TESTER ~~~~~
-    while (instLine < length) {
-        if (next == 0) { fetchDecode(instLine); instLine++; }
-        if (next == 1) { ALU(arg1, arg2, command); }
-        if (next == 2) { memoryCommands(command, arg1, instLine); }
-        if (next == 3) { registerWriteBack(arg1, result); }
-
-    }
-}
     
 int fetchDecode(int instLine) {
         char *arg;							// Token for strtok()
@@ -204,7 +184,7 @@ int fetchDecode(int instLine) {
             arg = strtok(NULL, " ");
             for (i = 0; i < 32; i++) {			// Find register value for 2nd arg
                 if (strcmp(arg, registerArray[i]) == 0) {
-                    result = registerMemory[i];
+                    arg2 = registerMemory[i];
                     break;
                 }
             }
@@ -214,7 +194,9 @@ int fetchDecode(int instLine) {
         
         // add, sub, mult, div, slt: $dest, $arg1, $arg2
         if (   strcmp(command, "add") == 0
+            || strcmp(command, "addi") == 0
             || strcmp(command, "sub") == 0
+            || strcmp(command, "subi") == 0
             || strcmp(command, "mult")== 0
             || strcmp(command, "div") == 0
             || strcmp(command, "slt") == 0	)
@@ -263,7 +245,7 @@ int fetchDecode(int instLine) {
                     break;
                 }
             }
-            next = 3;
+            next = 2;
         }
         
         // j, jal: target
@@ -345,9 +327,9 @@ int fetchDecode(int instLine) {
                 //Loop through labelArray to find proper label
                 for(int i = 0; i < 10; i++)
                 {   //Finds correct label, and then runs program starting at given index
-                    if(strcmp(labelArray[i], label) == 0)
+                    if(strcmp(LABELS[i], label) == 0)
                     {
-                        instLine = labelValueArray[i];
+                        instLine = LABELLINE[i];
                         next = 0;
                         return 1;
                     }
@@ -375,9 +357,9 @@ int fetchDecode(int instLine) {
                 //Loop through labelArray to find proper label
                 for(int i = 0; i < 10; i++)
                 {   //Finds correct label, and then runs program starting at given index
-                    if(strcmp(labelArray[i], label) == 0)
+                    if(strcmp(LABELS[i], label) == 0)
                     {
-                        instLine = labelValueArray[i];
+                        instLine = LABELLINE[i];
                         next = 1;
                         return 1;
                     }
@@ -407,18 +389,18 @@ int fetchDecode(int instLine) {
     {
         if(strcmp(command, "sw") == 0)
         {
-            mainMemory[memoryIndex] = registerMemory[targetRegister];
+            mainMemory[arg2] = registerMemory[arg1];
         }
         else if(strcmp(command, "lw") == 0)
         {
-            registerMemory[targetRegister] =  mainMemory[memoryIndex];
+            registerMemory[arg1] =  mainMemory[arg2];
         }
         else if(strcmp(command, "j") == 0) {
             for(int i = 0; i < 10; i++)
             {   //Finds correct label, and then runs program starting at given index
-                if(strcmp(labelArray[i], label) == 0)
+                if(strcmp(LABELS[i], label) == 0)
                 {
-                    instLine = labelValueArray[i];
+                    instLine = LABELLINE[i];
                     next = 0;
                     return 1;
                 }
@@ -431,10 +413,12 @@ int fetchDecode(int instLine) {
         {
             for(int i = 0; i < 10; i++)
             {   //Finds correct label, and then runs program starting at given index
-                if(strcmp(labelArray[i], label) == 0)
+                if(strcmp(LABELS[i], label) == 0)
                 {
-                    instLine = labelValueArray[i];
+                    instLine = LABELLINE[i];
                     registerMemory[31] = instLine;
+                    next = 0;
+                    break;
                 }
                 
             }
@@ -448,7 +432,7 @@ int fetchDecode(int instLine) {
     }
     int registerWriteBack(int targetRegister, int value)
     {
-        registerMemory[targetRegister] = value;
+        registerMemory[dest] = value;
         next = 0;
         return 0;
     }

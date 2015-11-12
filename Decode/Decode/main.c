@@ -98,8 +98,9 @@ static int fetchDecode(int index) {
 	}
 	
 	// sw and lw: $t, offset($s)
-	if (   strcmp(command, "sw") == 0
-		|| strcmp(command, "lw") == 0 )
+	if (   strcmp(command, "sw")  == 0
+		|| strcmp(command, "lw")  == 0
+		|| strcmp(command, "slt") == 0 )
 	{
 		arg = strtok(NULL, " ");
 		for (i = 0; i < 32; i++) {			// Get register INDEX
@@ -126,8 +127,9 @@ static int fetchDecode(int index) {
 		|| strcmp(command, "jr")  == 0 )
 	{
 		label = strtok(NULL, " ");	// Get label for if branch is true, save globally
-		ALU(0,0, command);
+		next = 1;
 	}
+	
 	free(instruction);
 	return 0;
 }

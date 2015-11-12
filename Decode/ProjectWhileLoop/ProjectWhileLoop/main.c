@@ -41,8 +41,12 @@ int result = 0;
 
 
 int main(int argc, const char * argv[]) {
+    char fileName[50];
+    
+    printf ("Enter the directory of the file you want to run (Default files in 'tests/fileName.asm'): ");
+    scanf ("%s", fileName);
     FILE *in_file;
-    in_file = fopen("tests/bubble.asm", "r");
+    in_file = fopen(fileName, "r");
     
     // If 'in_file' hasn't been initialized, stop execution
     if (in_file == NULL) {
@@ -199,7 +203,8 @@ int fetchDecode(int instLine) {
             || strcmp(command, "subi") == 0
             || strcmp(command, "mult")== 0
             || strcmp(command, "div") == 0
-            || strcmp(command, "slt") == 0	)
+            || strcmp(command, "slt") == 0
+            || strcmp(command, "sltu") == 0 )
         {
             arg = strtok(NULL, " ");
             for (i = 0; i < 32; i++) {			// Get value stored in first register

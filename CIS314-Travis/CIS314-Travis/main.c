@@ -21,7 +21,7 @@ void fileProcess(FILE*);
 
 int main(int argc, const char * argv[]) {
     FILE *in_file;
-    in_file = fopen("tests/function.asm", "r");
+    in_file = fopen("tests/fibonacci.asm", "r");
     
     // If 'in_file' hasn't been initialized, stop execution
     if (in_file == NULL) {
@@ -39,14 +39,15 @@ void fileProcess(FILE*in_file) {
     char *lineArray[MAX_SIZE];      // Parsed lines from 'in_file' for use of parsing instructions
     char *labelArray[MAX_SIZE];     // Parsed lines from 'in_file' for use of parsing labels
     char *instArray[MAX_SIZE];
+    char *finInst[MAX_SIZE];
     
     const size_t line_size = 301;   // Set buffer size limit for line lengths
     char *line = malloc(line_size);
     
     char *label;  // Token for labels
-    char *inst;   // Token for instructions
-    char *inst2;
-        char *lab2;
+    char *instruction;   // Token for instructions
+    char *reg;
+
     
     int i = 0;    // Counter
     int x = 0;    // Counter
@@ -60,13 +61,20 @@ void fileProcess(FILE*in_file) {
             if (line[l] == '\t') {
                 line[l] = ' ';
             }
+//            if (line[0] == ' ') {
+////                line[0] = line[l];
+//                printf("%s", line);
+//            }
         }
+        
         
         // Strip all lines that begin with #. Add the rest to 'lineArray'
         if (line[0] != '#' && line[0] != '\n' && strlen(line) > 2) {
             lineArray[i] = malloc(strlen(line));
+            instArray[i] = malloc(strlen(line));
             labelArray[i] = malloc(strlen(line));
             strcpy(lineArray[i], line);
+            strcpy(instArray[i], line);
             strcpy(labelArray[i], line);
             i++;
         }
@@ -77,8 +85,8 @@ void fileProcess(FILE*in_file) {
 /////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////// PRINT LINEARRAY /////////////////////////
-    for (int q = 1; q < i; q++) {
-//                printf("%s", lineArray[q]);
+    for (int q = 0; q < i; q++) {
+//        printf("%s", lineArray[q]);
     }
     ////////////////////////////////////////////////////////////////
     
@@ -109,59 +117,69 @@ void fileProcess(FILE*in_file) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
     
 ////////////////////// PRINT LINEARRAY /////////////////////////
-    for (int q = 1; q < i; q++) {
-//        printf("%s\n", lineArray[q]);
+    for (int q = 0; q < i; q++) {
+//        printf("%s", lineArray[q]);
     }
 ////////////////////////////////////////////////////////////////
     
 
 ///////// Removes all inline comments that start with #//////////
-    
-    /////////////
-    // Get the label the same way as above
-    // if the string is NOT the label, I know it is the instruction
-    //
-    // Separately, get the rest of the instruction, as your code already does
-    // Combine the two into 1 string, while storing into INSTRUCTIONS
-    //
-    // Note: Remove commas
-    /////////////
-    
     x = 0;
     for (int r = 0; r < i; r++) {
-//        lab2 = strtok(lineArray[r], ":");
-        inst = strtok(lineArray[r], "");
+        instruction = strtok(lineArray[r], " "); // Create token at first value (label or instruction)
         
-//        lab2 = strtok(NULL,"#");
-//        printf("LABEL %s\n", lab2);
-//        printf("INST %s\n", inst);
+        reg = strtok(instArray[r], " "); // Create token another at first value
+        reg = strtok(NULL, "#");         //   Then tokenize everything up to a comment (delimited by '#')
         
-        if (inst != NULL) {
-            inst2 = strtok(inst, "#");
-            
-//            INSTRUCTIONS[x] = malloc(30);
-//            strcpy(INSTRUCTIONS[x], inst);
-//            printf("%s\n", lab2);
-            printf("%s\n", inst);
-            x++;
+        // If a ':' exists in 'inst', replace 'inst' with a space (Removes the labels)
+        for (int s = 0; instruction[s] != NULL; s++) {
+            if (instruction[s] == ':') {
+                strcpy(instruction, "");
+            }
         }
-//        free(inst);
+        strcat(instruction, " "); // Add a space to the end of 'inst'
+        
+        for (int s = 0; reg[s] != NULL; s++) {
+            if (reg[s] == '\n') {
+                reg[s] = ' ';
+            }
+            
+            if (reg[s] == ',') {
+                reg[s] = ' ';
+            }
+        }
+       
+        
+        INSTRUCTIONS[x] = malloc(30);
+        strcat(INSTRUCTIONS[x], instruction);   // Add the instruction
+        strcat(INSTRUCTIONS[x++], reg);  // Add the registers and constants
+        
+        
+//        printf("%s", instruction);
+//        printf("%s\n", reg);
     }
 ////////////////////////////////////////////////////////////////
 
 ////////////////////// PRINT ARRAYS ////////////////////////////
-    for (int q = 1; q < i; q++) {
+
+    
+    for (int q = 0; q < i; q++) {
 //        printf("%s\n", lineArray[q]);
     }
-//    printf("\n");
+//    printf("Labels and Line Numbers:\n");
     for (int q = 0; LABELS[q] != NULL; q++) {
-//        printf("%s ", LABELS[q]);
-//        printf("%d\n", LABELLINE[q]);
+        printf("%s ", LABELS[q]);
+        printf("%d\n", LABELLINE[q]);
+
 //
     }
-//    printf("\n");
+//    INSTRUCTIONS[q] != NULL
+    printf("\n");
+    
     for (int q = 0; INSTRUCTIONS[q] != NULL; q++) {
-//        printf("%s\n", INSTRUCTIONS[q]);
+        printf("%s\n", INSTRUCTIONS[q]);
     }
+//        printf("Index 27(Expected 'loop' + beq $t0 $zero done): %s", INSTRUCTIONS[27]);
+//        printf("Index 38(Expected 'done' + bne $t2 $zero main): %s", INSTRUCTIONS[38]);
 ///////////////////////////////////////////////////////////////
 } // End fileParse

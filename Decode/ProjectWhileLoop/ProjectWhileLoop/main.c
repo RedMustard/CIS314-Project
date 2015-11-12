@@ -1,8 +1,12 @@
 /*
  * Alex Geoffrey, Cody Ebert and Travis Barnes
- * Alex: Thursday 2PM Lab Section
+ * Alex: Friday 4pm Lab
+ * Travis: Wednesday 3pm Lab
+ * Cody: Wednesday 3pm Lab
+ *
  * CIS 314 Group Project Fall 2015
  *
+ * Copyright 2015
  */
 
 #include <stdio.h>

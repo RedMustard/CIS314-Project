@@ -50,6 +50,9 @@ int result = 0;
 
 int main(int argc, const char * argv[]) {
     char fileName[50];
+    //Clock
+    int clockCounter = 0;
+    char * currentInstructions[5];
     
     // User input
     printf ("Enter the directory of the file you want to run (Default files in 'tests/fileName.asm'): ");
@@ -71,6 +74,7 @@ int main(int argc, const char * argv[]) {
         if (next == 1) { ALU(arg1, arg2, command); }
         if (next == 2) { memoryCommands(command, arg1, instLine); }
         if (next == 3) { registerWriteBack(arg1, result); }
+        clockCounter++;
     }
     
     return 0;

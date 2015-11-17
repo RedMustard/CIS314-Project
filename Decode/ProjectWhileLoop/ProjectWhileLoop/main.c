@@ -23,9 +23,10 @@
 // Forward-declaring functions:
 void fileProcess(FILE*);
 int ALU(int, int, char *);
-int fetchDecode(int );
-int registerWriteBack(int targetRegister, int value);
+void fetch(int);
+void fetchDecode(int);
 int memoryCommands(char * command, int targetRegister, int memoryIndex);
+void registerWriteBack(int targetRegister, int value);
 
 // Global Variables
 char *INSTRUCTIONS[MAX_SIZE]; // Processed instructions from 'in_file' (Up to 200 max instructions)
@@ -37,9 +38,9 @@ static char *registerArray[32] = {"$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$
 static int registerMemory[32] = {};	// Register data cache
 static char *label;		// Current branch label (if beq/bne is called)
 int mainMemory [300];
-int length = sizeof(INSTRUCTIONS) / sizeof(INSTRUCTIONS[0]);
 int next = 0;   // 0 = fetchDecode, 1 = ALU, 2 = regWriteBack, 3 = memCommands
-char *command;                      // Ie. add, jal, beq, mult, etc. of instruction
+int allIndex = 0;
+char *command [5];                      // Ie. add, jal, beq, mult, etc. of instruction
 int instLine = 0;
 int dest = 0;
 int arg1 = 0;
@@ -47,9 +48,11 @@ int arg2 = 0;
 int offset = 0;
 int result = 0;
 
-
 int main(int argc, const char * argv[]) {
     char fileName[50];
+    int total = 0;
+    int length = sizeof(INSTRUCTIONS) / sizeof(INSTRUCTIONS[0]);
+    
     
     // User input
     printf ("Enter the directory of the file you want to run (Default files in 'tests/fileName.asm'): ");
@@ -65,13 +68,24 @@ int main(int argc, const char * argv[]) {
     
     fileProcess(in_file);     // Send 'in_file' to be processed
     
+    
+    
     // Start fetchDecode / ALU Ops
     while (instLine < length) {
+        allIndex = total % 5;
         if (next == 0) { fetchDecode(instLine); instLine++; }
-        if (next == 1) { ALU(arg1, arg2, command); }
-        if (next == 2) { memoryCommands(command, arg1, instLine); }
+        total ++;
+        allIndex = total % 5;
+        if (next == 1) { ALU(arg1, arg2, command[allIndex]); }
+        total ++;
+        allIndex = total % 5;
+        if (next == 2) { memoryCommands(command[allIndex], arg1, instLine); }
+        total ++;
+        allIndex = total % 5;
         if (next == 3) { registerWriteBack(arg1, result); }
+        total = total + 2;
     }
+    
     
     return 0;
 } // End main
@@ -179,20 +193,25 @@ void fileProcess(FILE*in_file) {
 //    }
 } // End fileParse
 
+void fetch(int instLine) {
+    char *instruction;                          // Copy of instruction
     
-int fetchDecode(int instLine) {
+    instruction = (char *) malloc(32);              // Allocate space for instruction
+    strcpy(instruction, INSTRUCTIONS[instLine]);	// Make copy of current instruction
+    command [allIndex] = strtok(instruction, " ");             // Get command argument from instruction (add, jal, etc.)
+    printf("Current command: %c\n", *command[allIndex]);
+
+    free(instruction);
+    next = 1;
+}
+
+void fetchDecode(int instLine) {
         char *arg;							// Token for strtok()
-        char *instruction;					// Copy of instruction
         int i = 0;
-        
-        instruction = (char *) malloc(32);
-        strcpy(instruction, INSTRUCTIONS[instLine]);	// Make copy of current instruction
-        command = strtok(instruction, " ");		// Get command argument from instruction (add, jal, etc.)
-        printf("Current command: %s\n", command);
-        
+    
         // beq and bne: $s, $t, offset
-        if (   strcmp(command, "beq") == 0
-            || strcmp(command, "bne") == 0) {
+        if (   strcmp(command[allIndex], "beq") == 0
+            || strcmp(command[allIndex], "bne") == 0) {
             arg = strtok(NULL, " ");
             for (i = 0; i < 32; i++) {			// Find register value for 1st arg
                 if (strcmp(arg, registerArray[i]) == 0) {
@@ -212,14 +231,14 @@ int fetchDecode(int instLine) {
         }
         
         // add, sub, mult, div, slt: $dest, $arg1, $arg2
-        if (   strcmp(command, "add") == 0
-            || strcmp(command, "addi") == 0
-            || strcmp(command, "sub") == 0
-            || strcmp(command, "subi") == 0
-            || strcmp(command, "mult")== 0
-            || strcmp(command, "div") == 0
-            || strcmp(command, "slt") == 0
-            || strcmp(command, "sltu") == 0 )
+        if (   strcmp(command[allIndex], "add") == 0
+            || strcmp(command[allIndex], "addi") == 0
+            || strcmp(command[allIndex], "sub") == 0
+            || strcmp(command[allIndex], "subi") == 0
+            || strcmp(command[allIndex], "mult")== 0
+            || strcmp(command[allIndex], "div") == 0
+            || strcmp(command[allIndex], "slt") == 0
+            || strcmp(command[allIndex], "sltu") == 0 )
         {
             arg = strtok(NULL, " ");
             for (i = 0; i < 32; i++) {			// Get value stored in first register
@@ -303,9 +322,6 @@ int fetchDecode(int instLine) {
             if (i == 32) { arg2 = atoi(arg); }	// If arg was immediate (not register), arg2 = immediate value
             next = 1;
         }
-    
-        free(instruction);
-        return 0;
     }
 
 
@@ -450,10 +466,9 @@ int fetchDecode(int instLine) {
         next = 0;
         return 0;
     }
-    int registerWriteBack(int targetRegister, int value)
+    void registerWriteBack(int targetRegister, int value)
     {
         registerMemory[dest] = value;
         next = 0;
-        return 0;
     }
     

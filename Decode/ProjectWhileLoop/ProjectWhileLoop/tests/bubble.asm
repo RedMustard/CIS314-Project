@@ -45,4 +45,3 @@ next: addi $t1,$t1,4        # pa++
 done: bne $t2,$zero,main    # if (exchange) goto main
 
 end: 
-

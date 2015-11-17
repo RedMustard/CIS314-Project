@@ -1,10 +1,13 @@
 /*
  * Alex Geoffrey, Cody Ebert and Travis Barnes
+ *
  * Alex: Friday 4pm Lab
  * Travis: Wednesday 3pm Lab
  * Cody: Wednesday 3pm Lab
  *
  * CIS 314 Group Project Fall 2015
+ *
+ *
  *
  * Copyright 2015
  */
@@ -28,6 +31,7 @@ int memoryCommands(char * command, int targetRegister, int memoryIndex);
 char *INSTRUCTIONS[MAX_SIZE]; // Processed instructions from 'in_file' (Up to 200 max instructions)
 char *LABELS[20];             // Labels from processed instructions
 int LABELLINE[20];            // Line number where the label was found
+
 // static char *INSTRUCTIONS[5] ={"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};
 static char *registerArray[32] = {"$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3", "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9", "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8", "$k0", "$k1", "$gp", "$sp", "$ra"};
 static int registerMemory[32] = {};	// Register data cache
@@ -47,6 +51,7 @@ int result = 0;
 int main(int argc, const char * argv[]) {
     char fileName[50];
     
+    // User input
     printf ("Enter the directory of the file you want to run (Default files in 'tests/fileName.asm'): ");
     scanf ("%s", fileName);
     FILE *in_file;
@@ -57,6 +62,7 @@ int main(int argc, const char * argv[]) {
         printf("Error Reading File\n");
         exit (0);
     }
+    
     fileProcess(in_file);     // Send 'in_file' to be processed
     
     // Start fetchDecode / ALU Ops
@@ -73,7 +79,7 @@ int main(int argc, const char * argv[]) {
 void fileProcess(FILE*in_file) {
     char *labelArray[MAX_SIZE];     // Parsed lines from 'in_file' for use of parsing labels
     char *instArray[MAX_SIZE];      // Parsed lines from 'in_file' for use of parsing instructions
-    char *regArray[MAX_SIZE];      // Parsed lines from 'in_file' for use of parsing registers/constants
+    char *regArray[MAX_SIZE];       // Parsed lines from 'in_file' for use of parsing registers/constants
     
     const size_t line_size = 301;   // Set buffer size limit for line lengths
     char *line = malloc(line_size);
@@ -81,7 +87,6 @@ void fileProcess(FILE*in_file) {
     char *label;         // Token for labels
     char *instruction;   // Token for instructions
     char *reg;           // Token for registers/constants
-    
     
     int i = 0;    // Counter for lines in 'in_file'
     int x = 0;    // Counter for array indexes
@@ -107,7 +112,6 @@ void fileProcess(FILE*in_file) {
             strcpy(labelArray[i], line);
             i++;
         }
-        
     } // End while
     
     free(line);         // Done with 'line' now, so deallocate the memory
@@ -130,11 +134,9 @@ void fileProcess(FILE*in_file) {
                 LABELS[x] = malloc(strlen(label));
                 strcpy(LABELS[x], label);
                 LABELLINE[x++] = p;
-                
             }
         } // End for
     } // End for
-    
     
     // Tokenize labels and instructions from 'instArray' and remove labels (only keep instructions).
     //  Tokenize registers/constants from 'regArray' and remove any comments (delimited by '#')
@@ -156,16 +158,25 @@ void fileProcess(FILE*in_file) {
         strcat(instruction, " "); // Add a space to the end of 'inst'
         
         // If a character in 'reg' is a '\n' or ',' make it a space
-        for (int s = 0; reg[s] != NULL; s++) {
+        for (int s = 0; reg != NULL && reg[s] != NULL; s++) {
             if (reg[s] == '\n' || reg[s] == ',') {
                 reg[s] = ' ';
             }
         }
         
-        INSTRUCTIONS[x] = malloc(30);
-        strcat(INSTRUCTIONS[x], instruction);   // Add the instruction
-        strcat(INSTRUCTIONS[x++], reg);  // Add the registers and constants
+        // Only add to INSTRUCTIONS if the line has
+        if (reg != NULL && strlen(reg) > 5) {
+            INSTRUCTIONS[x] = malloc(30);
+            strcat(INSTRUCTIONS[x], instruction);   // Add the instruction
+            strcat(INSTRUCTIONS[x++], reg);  // Add the registers and constants
+        }
+        
     } // End for
+
+//        printf("%s\n", INSTRUCTIONS[2]);
+//    for (int s = 0; INSTRUCTIONS[s] != NULL; s++) {
+//        printf("%s\n", INSTRUCTIONS[s]);
+//    }
 } // End fileParse
 
     

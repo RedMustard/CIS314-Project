@@ -27,7 +27,7 @@ int fetchDecode(int );
 int registerWriteBack(int targetRegister, int value);
 int memoryCommands(char * command, int targetRegister, int memoryIndex);
 
-// Global Variables
+// Global Arrays
 char *INSTRUCTIONS[MAX_SIZE]; // Processed instructions from 'in_file' (Up to 200 max instructions)
 char *LABELS[20];             // Labels from processed instructions
 int LABELLINE[20];            // Line number where the label was found
@@ -168,7 +168,7 @@ void fileProcess(FILE*in_file) {
             }
         }
         
-        // Only add to INSTRUCTIONS if the line has
+        // Only add parsed reg/instruction to INSTRUCTIONS if there is relevant content (not just spaces)
         if (reg != NULL && strlen(reg) > 5) {
             INSTRUCTIONS[x] = malloc(30);
             strcat(INSTRUCTIONS[x], instruction);   // Add the instruction
@@ -176,11 +176,6 @@ void fileProcess(FILE*in_file) {
         }
         
     } // End for
-
-//        printf("%s\n", INSTRUCTIONS[2]);
-//    for (int s = 0; INSTRUCTIONS[s] != NULL; s++) {
-//        printf("%s\n", INSTRUCTIONS[s]);
-//    }
 } // End fileParse
 
     

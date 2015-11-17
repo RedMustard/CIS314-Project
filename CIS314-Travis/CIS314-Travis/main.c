@@ -21,7 +21,7 @@ void fileProcess(FILE*);
 
 int main(int argc, const char * argv[]) {
     FILE *in_file;
-    in_file = fopen("tests/fibonacci.asm", "r");
+    in_file = fopen("tests/bubble.asm", "r");
     
     // If 'in_file' hasn't been initialized, stop execution
     if (in_file == NULL) {
@@ -38,7 +38,7 @@ int main(int argc, const char * argv[]) {
 void fileProcess(FILE*in_file) {
     char *labelArray[MAX_SIZE];     // Parsed lines from 'in_file' for use of parsing labels
     char *instArray[MAX_SIZE];      // Parsed lines from 'in_file' for use of parsing instructions
-    char *regArray[MAX_SIZE];      // Parsed lines from 'in_file' for use of parsing registers/constants
+    char *regArray[MAX_SIZE];       // Parsed lines from 'in_file' for use of parsing registers/constants
     
     const size_t line_size = 301;   // Set buffer size limit for line lengths
     char *line = malloc(line_size);
@@ -97,7 +97,6 @@ void fileProcess(FILE*in_file) {
         } // End for
     } // End for
     
-
     // Tokenize labels and instructions from 'instArray' and remove labels (only keep instructions).
     //  Tokenize registers/constants from 'regArray' and remove any comments (delimited by '#')
     //  Concatenate instructions and registers/constants into INSTRUCTIONS
@@ -118,14 +117,22 @@ void fileProcess(FILE*in_file) {
         strcat(instruction, " "); // Add a space to the end of 'inst'
         
         // If a character in 'reg' is a '\n' or ',' make it a space
-        for (int s = 0; reg[s] != NULL; s++) {
+        for (int s = 0; reg != NULL && reg[s] != NULL; s++) {
             if (reg[s] == '\n' || reg[s] == ',') {
                 reg[s] = ' ';
             }
         }
         
-        INSTRUCTIONS[x] = malloc(30);
-        strcat(INSTRUCTIONS[x], instruction);   // Add the instruction
-        strcat(INSTRUCTIONS[x++], reg);  // Add the registers and constants
+        // Only add to INSTRUCTIONS if the line has
+        if (reg != NULL && strlen(reg) > 5) {
+            INSTRUCTIONS[x] = malloc(30);
+            strcat(INSTRUCTIONS[x], instruction);   // Add the instruction
+            strcat(INSTRUCTIONS[x++], reg);  // Add the registers and constants
+        }
+            
     } // End for
+    
+    for (int s = 0; INSTRUCTIONS[s] != NULL; s++) {
+        printf("%s\n", INSTRUCTIONS[s]);
+    }
 } // End fileParse

@@ -7,8 +7,6 @@
  *
  * CIS 314 Group Project Fall 2015
  *
- *
- *
  * Copyright 2015
  */
 
@@ -39,16 +37,16 @@ static int registerMemory[33] = {};	// Register data cache
 static char *label;		// Current branch label (if beq/bne is called)
 int mainMemory [300];
 int length = sizeof(INSTRUCTIONS) / sizeof(INSTRUCTIONS[0]);
-int next = 0;   // 0 = fetch 1 = Decode, 2 = ALU, 3 = regWriteBack, 4 = memCommands
-char *command[5];                      // Ie. add, jal, beq, mult, etc. of instruction
-int instLine = 0;
-int dest[5] = {};
-int arg1[5] = {};
-int arg2[5] = {};
+int next = 0;       // 0 = fetch 1 = Decode, 2 = ALU, 3 = regWriteBack, 4 = memCommands
+char *command[5];   // Ie. add, jal, beq, mult, etc. of instruction
+int instLine = 0;   // Index counter for accessing INSTRUCTIONS
+int dest[5] = {};   // Destination register
+int arg1[5] = {};   // Register argument 1
+int arg2[5] = {};   // Register argument 2
 int offset = 0;
 int result = 0;
 int total =0;
-int num = 0;
+int num = 0;        // Pipeline instruction counter
 
 
 int main(int argc, const char * argv[]) {
@@ -59,12 +57,10 @@ int main(int argc, const char * argv[]) {
     
     //Holds current instructions
     //***Need to write population code***
-    int currentInstructions[5] = {};
+    int currentInstructions[5] = {-1,-1,-1,-1,-1};
     int nextStage[5] = {};
     //Indexes current commands
     int next = 0;
-    
-    
     
     // User input
     printf ("Enter the directory of the file you want to run (Default files in 'tests/fileName.asm'): ");
@@ -82,7 +78,7 @@ int main(int argc, const char * argv[]) {
     
     // Start fetchDecode / ALU Ops
     
-    //***Add in pre-instructions to get five instructsions in flight***
+    
   
     //***Change bounds on loop***
     while(instLine < length)
@@ -94,39 +90,32 @@ int main(int argc, const char * argv[]) {
             next = nextStage[num];
             // Start fetchDecode / ALU Ops
             //If registers are in use, break
-           if(arg1[num] == dest[(total-1)%5]
-                    || arg1[num] == dest[(total-2)%5]
-                    || arg2[num] == dest[(total-1)%5]
+           if(arg1[num] == dest[(total-1)%5] || arg1[num] == dest[(total-2)%5] || arg2[num] == dest[(total-1)%5]
                     || arg2[num] == dest[(total-2)%5])
             {
                 break;
             }
+            
             //Otherwise execute normally
-            else
-            {
+            else {
                 //Call depending on stage, num is the current instruction being worked on
-               if (next == 0)
-               {
+                if (next == 0) {
                    //***I dont know if these are the correct arguments or not***
                    fetch(instLine, num);
-               }
-                else if(next == 1)
-               {
+                    
+                } else if(next == 1) {
                    decode(instLine);
                    instLine++;
-               }
-               if (next == 2)
-               {
+                    
+                } else if (next == 2) {
                    ALU(arg1[num], arg2[num], command[num]);
-               }
-               if (next == 3)
-               {
+                    
+                } else if (next == 3) {
                    memoryCommands(command[num], arg1[num], instLine);
-               }
-               if (next == 4)
-               {
+                    
+                } else if (next == 4) {
                    registerWriteBack(arg1[num], result);
-               }
+                }
                 
                 //Increments the stage of the current instruction
                 nextStage[num] = nextStage[num] +1;
@@ -147,6 +136,7 @@ int main(int argc, const char * argv[]) {
     
     return 0;
 } // End main
+
 
 void fileProcess(FILE*in_file) {
     char *labelArray[MAX_SIZE];     // Parsed lines from 'in_file' for use of parsing labels
@@ -242,13 +232,13 @@ void fileProcess(FILE*in_file) {
             strcat(INSTRUCTIONS[x], instruction);   // Add the instruction
             strcat(INSTRUCTIONS[x++], reg);  // Add the registers and constants
         }
-        
     } // End for
 } // End fileParse
 
     
 void fetch(int instLine, int num) {
     char *instruction;                          // Copy of instruction
+    
     
     instruction = (char *) malloc(32);              // Allocate space for instruction
     strcpy(instruction, INSTRUCTIONS[instLine]);    // Make copy of current instruction
@@ -258,6 +248,7 @@ void fetch(int instLine, int num) {
     free(instruction);
     next = 1;
 }
+
 
 void decode(int instLine) {
     char *arg;                            // Token for strtok()
@@ -379,7 +370,7 @@ void decode(int instLine) {
 }
 
 
-    int ALU(int arg1, int arg2, char * command)
+int ALU(int arg1, int arg2, char * command)
     {
         //Add
         if(strcmp(command, "add") == 0 || strcmp(command, "addi") == 0)
@@ -474,8 +465,10 @@ void decode(int instLine) {
         }
         return 1;
     }
-    //SW/LW
-    int memoryCommands(char * command, int targetRegister, int memoryIndex)
+
+
+//SW/LW
+int memoryCommands(char * command, int targetRegister, int memoryIndex)
     {
         if(strcmp(command, "sw") == 0)
         {
@@ -524,7 +517,9 @@ void decode(int instLine) {
         next = 0;
         return 0;
     }
-    int registerWriteBack(int targetRegister, int value)
+
+
+int registerWriteBack(int targetRegister, int value)
     {
         registerMemory[dest[num]] = value;
         next = 0;

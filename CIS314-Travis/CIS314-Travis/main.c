@@ -124,7 +124,7 @@ void fileProcess(FILE*in_file) {
         }
         
         // Only add to INSTRUCTIONS if the line has
-        if (reg != NULL && strlen(reg) > 5) {
+        if (reg != NULL) {
             INSTRUCTIONS[x] = malloc(30);
             strcat(INSTRUCTIONS[x], instruction);   // Add the instruction
             strcat(INSTRUCTIONS[x++], reg);  // Add the registers and constants

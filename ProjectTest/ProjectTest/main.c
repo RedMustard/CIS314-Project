@@ -10,7 +10,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-#define  INSTRUCTION_SIZE 5
 
 // Forward-declaring functions:
 
@@ -20,7 +19,7 @@ int registerWriteBack(int targetRegister, int value);
 int memoryCommands(char * command, int targetRegister, int memoryIndex);
 
 // Global Variables
-static char *INSTRUCTIONS[INSTRUCTION_SIZE] ={"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};
+static char *INSTRUCTIONS[5] ={"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};
 static char *registerArray[32] = {"$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3", "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9", "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8", "$k0", "$k1", "$gp", "$sp", "$ra"};
 static int registerMemory[32] = {0, 1, 2,3,4,5,6,7,9};	// Register data cache
 static char *label;		// Current branch label (if beq/bne is called)
@@ -39,41 +38,19 @@ int temp = 0;
 
 int main ()
 {
-   int index = 0;
+    int index = 0;
     //INSTRUCTIONS[5] = {"add $a0 $a1 5" , "sub $t0 $v1 6", "add $v1 $at 1", "sw $v1 4($at)", "j label"};	// ~~~~~ FUNCTION TESTER ~~~~~
+    if (next == 0) { fetchDecode(index); }
     
-    while(index < INSTRUCTION_SIZE)
-    {
-        if (next == 0)
-        {
-            fetchDecode(index);
-        }
-    
-        if (next == 1)
-        {
-            ALU(arg1, arg2, command);
-            if( strcmp(command, "j")   == 0
-               || strcmp(command, "jal") == 0
-               || strcmp(command, "jr")  == 0
-               || strcmp(command, "beq") == 0
-               || strcmp(command, "bne") == 0)
-            {
-                index = temp;
-            }
-            else
-                index ++;
-        }
-        if (next == 2)
-        {
-            registerWriteBack(arg1, arg2);
-        }
-        //What the fuck is happening here, Alex?? AND WHERE ARE THE MEMORY COMMANDS?!
-        if (next == 3)
-        {
-            
-        }
-    
+    if (next == 1) {
+        ALU(arg1, arg2, command);
     }
+    if (next == 2) {
+        registerWriteBack(arg1, arg2);
+    }
+    if (next == 3) {
+    
+    
     
 }
 
@@ -213,8 +190,8 @@ int ALU(int arg1, int arg2, char * command)
             {   //Finds correct label, and then runs program starting at given index
                 if(strcmp(labelArray[i], label) == 0)
                 {
-                    temp = labelValueArray[i];
-                    next = 1;
+                    int temp = labelValueArray[i];
+                    fetchDecode(temp);
                     return 1;
                 }
                 

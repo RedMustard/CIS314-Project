@@ -113,7 +113,7 @@ int main(int argc, const char * argv[]) {
                     memoryCommands(command[num], arg1[num], instLine);
                     
                 } else if (next == 4) {
-                    registerWriteBack(arg1[num], result);
+                    registerWriteBack(arg1[num], result[num]); // CHANGED result TO result[num] !!!!!!!
                 }
                 
                 //Increments the stage of the current instruction
@@ -158,7 +158,7 @@ void fileProcess(FILE*in_file) {
     while (fgets(line, line_size, in_file) != NULL)  {
         
         // If a character in 'line' is a tab, make it a space
-        for (int l = 0; line[l] != NULL; l++) {
+        for (int l = 0; line[l] != '\0'; l++) {
             if (line[l] == '\t') {
                 line[l] = ' ';
             }
@@ -190,7 +190,7 @@ void fileProcess(FILE*in_file) {
         }
         
         // If the label has a ':' in it, add to LABELS and line number to LABELLINE
-        for (int j = 0; label[j] != NULL; j++) {
+        for (int j = 0; label[j] != '\0'; j++) {
             if (label[j] == ':') {
                 label[j] = ' ';
                 label = strtok(labelArray[p]," ");
@@ -212,7 +212,7 @@ void fileProcess(FILE*in_file) {
         reg = strtok(NULL, "#");         //   Then tokenize everything up to a comment (delimited by '#')
         
         // If a ':' exists in 'inst', replace 'instruction' with a space (Removes the labels)
-        for (int s = 0; instruction[s] != NULL; s++) {
+        for (int s = 0; instruction[s] != '\0'; s++) {
             if (instruction[s] == ':') {
                 strcpy(instruction, "");
             }
@@ -221,7 +221,7 @@ void fileProcess(FILE*in_file) {
         strcat(instruction, " "); // Add a space to the end of 'inst'
         
         // If a character in 'reg' is a '\n' or ',' make it a space
-        for (int s = 0; reg != NULL && reg[s] != NULL; s++) {
+        for (int s = 0; reg != NULL && reg[s] != '\0'; s++) {
             if (reg[s] == '\n' || reg[s] == ',') {
                 reg[s] = ' ';
             }
@@ -261,8 +261,8 @@ void decode(int instLine)
     if(instLine != -1)
     {
         // beq and bne: $s, $t, offset
-        if (   strcmp(command, "beq") == 0
-            || strcmp(command, "bne") == 0) {
+        if (   strcmp(command[num], "beq") == 0
+            || strcmp(command[num], "bne") == 0) {
             arg = strtok(NULL, " ");
             for (i = 0; i < 32; i++) {			// Find register value for 1st arg
                 if (strcmp(arg, registerArray[i]) == 0) {
@@ -504,7 +504,7 @@ int memoryCommands(char * command, int targetRegister, int memoryIndex)
                     {
                         registerMemory[31] = instLine;
                         instLine = LABELLINE[i];
-                        //                registerMemory[31] = arg1 + 1;
+//                                        registerMemory[31] = arg1 + 1;
                         next = 0;
                         break;
                     }

@@ -21,7 +21,7 @@ void fileProcess(FILE*);
 
 int main(int argc, const char * argv[]) {
     FILE *in_file;
-    in_file = fopen("tests/bubble.asm", "r");
+    in_file = fopen("tests/fibonacci.asm", "r");
     
     // If 'in_file' hasn't been initialized, stop execution
     if (in_file == NULL) {
@@ -55,7 +55,7 @@ void fileProcess(FILE*in_file) {
     while (fgets(line, line_size, in_file) != NULL)  {
         
         // If a character in 'line' is a tab, make it a space
-        for (int l = 0; line[l] != NULL; l++) {
+        for (int l = 0; line[l] != '\0'; l++) {
             if (line[l] == '\t') {
                 line[l] = ' ';
             }
@@ -87,7 +87,7 @@ void fileProcess(FILE*in_file) {
         }
         
         // If the label has a ':' in it, add to LABELS and line number to LABELLINE
-        for (int j = 0; label[j] != NULL; j++) {
+        for (int j = 0; label[j] != '\0'; j++) {
             if (label[j] == ':') {
                 label[j] = ' ';
                 LABELS[x] = malloc(strlen(label));
@@ -108,7 +108,7 @@ void fileProcess(FILE*in_file) {
         reg = strtok(NULL, "#");         //   Then tokenize everything up to a comment (delimited by '#')
         
         // If a ':' exists in 'inst', replace 'instruction' with a space (Removes the labels)
-        for (int s = 0; instruction[s] != NULL; s++) {
+        for (int s = 0; instruction[s] != '\0'; s++) {
             if (instruction[s] == ':') {
                 strcpy(instruction, "");
             }
@@ -117,7 +117,7 @@ void fileProcess(FILE*in_file) {
         strcat(instruction, " "); // Add a space to the end of 'inst'
         
         // If a character in 'reg' is a '\n' or ',' make it a space
-        for (int s = 0; reg != NULL && reg[s] != NULL; s++) {
+        for (int s = 0; reg != NULL && reg[s] != '\0'; s++) {
             if (reg[s] == '\n' || reg[s] == ',') {
                 reg[s] = ' ';
             }

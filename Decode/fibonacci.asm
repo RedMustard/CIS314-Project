@@ -25,9 +25,9 @@ main:	addi	$s0, $0, 12		# Fib(4)
 # uses: $t0, $t1
 ##############################################################################################
 
-
-# 							# procedure prologue:
-Fib:	sw		$ra,0($sp)		# save return address on stack, since recursive,
+Fib:
+								# procedure prologue:
+		sw		$ra,0($sp)		# save return address on stack, since recursive,
 		addi	$sp,$sp,-4		#   and decrement stack pointer
 		sw		$fp,0($sp)		# save previous frame pointer on stack
 		addi	$sp,$sp,-4		#   and decrement stack pointer
@@ -44,7 +44,7 @@ do_recurse:	addi	$t0,$t0,-1		# $t0 = n-1
 			sw		$t0,0($sp)		# push argument n-1 on stack
 			addi	$sp,$sp,-4		#   and decrement stack pointer
 			jal		Fib				# call Fibonacci with argument n-1
-#									# leave result on stack for now
+									# leave result on stack for now
 			lw		$t0,0($fp)		# re-copy argument to $t0:  $t0 = n
 			addi	$t0,$t0,-2		# $t0 = n-2
 			sw		$t0,0($sp)		# push argument n-2 on stack
@@ -55,13 +55,13 @@ do_recurse:	addi	$t0,$t0,-1		# $t0 = n-1
 			addi	$sp,$sp,4		# increment stack pointer
 			lw		$t1,0($sp)		#   and pop result of Fib(n-1) from stack into $t1
 			add		$t0,$t0,$t1		# $t0 = Fib(n-2) + Fib(n-1); have result
-#									# procedure epilogue: $t0 holds result
+									# procedure epilogue: $t0 holds result
 epilogue:	addi	$sp,$sp,4		# increment stack pointer
 			lw		$fp,0($sp)		#   and pop saved frame pointer into $fp
 			addi	$sp,$sp,4		# increment stack pointer
 			lw		$ra,0($sp)		#   and pop return address into $ra
 			addi	$sp,$sp,4		# increment stack pointer
-#									#   to pop argument (n) from stack (discard)
+									#   to pop argument (n) from stack (discard)
 			sw		$t0,0($sp)		# push result onto stack
 			addi	$sp,$sp,-4		#   and decrement stack pointer
 			jr		$ra				# return to caller

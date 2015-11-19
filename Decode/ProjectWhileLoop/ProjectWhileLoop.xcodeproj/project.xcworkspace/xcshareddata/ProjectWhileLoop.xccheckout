@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>FD8EBAE0-5A4A-45C1-B3F6-4A3747326CCB</string>
 	<key>IDESourceControlProjectName</key>
-	<string>ProjectWhileLoop</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>CD45E0777F2565344C7EAC0EE0ADDC4D2ACBD9B7</key>
 		<string>https://github.com/RedMustard/CIS314-Project.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Decode/ProjectWhileLoop/ProjectWhileLoop.xcodeproj</string>
+	<string>Decode/ProjectWhileLoop/ProjectWhileLoop.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>CD45E0777F2565344C7EAC0EE0ADDC4D2ACBD9B7</key>

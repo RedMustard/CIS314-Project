@@ -473,13 +473,13 @@ int memoryCommands(char * command, int targetRegister, int memoryIndex)
         {
             if(strcmp(command, "sw") == 0)
             {
-                int num = arg2[num]/4;
+                int index = arg2[num]/4;
                 mainMemory[index] = registerMemory[arg1[num]];
                 
             }
             else if(strcmp(command, "lw") == 0)
             {
-                int num = arg2[num]/4;
+                int index = arg2[num]/4;
                 registerMemory[arg1[num]] =  mainMemory[index];
             }
             else if(strcmp(command, "j") == 0) {

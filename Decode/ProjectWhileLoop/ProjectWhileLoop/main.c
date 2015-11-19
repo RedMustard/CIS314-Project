@@ -87,24 +87,23 @@ int main(int argc, const char * argv[]) {
     {
         //Make while, use head and tail in the array/iterator/counter
         //Loops through the current instructions being worked on in this iteration
-        for(int i = 0; i < 5 ; i++)
-        {
+        for(int i = 0; i < 5 ; i++) {
             next = nextStage[num];
             // Start fetchDecode / ALU Ops
 
-            //If registers are in use, break
+            //If registers are in use, send a bubble
            if(arg1[num] == dest[(total-1)%5]
               || arg1[num] == dest[(total-2)%5]
               || arg2[num] == dest[(total-1)%5]
               || arg2[num] == dest[(total-2)%5])
-            {
+           {
                 fetch(-1, num);
-            }
+           }
             
             //Otherwise execute normally
-            else {
+           else {
                 //Call depending on stage, num is the current instruction being worked on
-                if (next == 0) {
+               if (next == 0) {
                    //***I dont know if these are the correct arguments or not***
                    fetch(instLine, num);
 
@@ -112,13 +111,13 @@ int main(int argc, const char * argv[]) {
                     decode(currentInstructions[num]);
                     
                 } else if (next == 2) {
-                   ALU(arg1[num], arg2[num], command[num]);
+                    ALU(arg1[num], arg2[num], command[num]);
                     
                 } else if (next == 3) {
-                   memoryCommands(command[num], arg1[num], instLine);
+                    memoryCommands(command[num], arg1[num], instLine);
                     
                 } else if (next == 4) {
-                   registerWriteBack(arg1[num], result);
+                    registerWriteBack(arg1[num], result);
                 }
                 
                 //Increments the stage of the current instruction
@@ -128,9 +127,10 @@ int main(int argc, const char * argv[]) {
                 //Unifying index for all current instructions and corresponding arrays
                 num = total%5;
                 printf("%d", clockCounter);
-            }
-          
-        }
+               
+            } // End else
+        } // End for
+        
         //Increment again to start at proper index for next iteration
         total++;
         num = total%5;
@@ -244,12 +244,9 @@ void fileProcess(FILE*in_file) {
 void fetch(int instLine, int num) {
     char *instruction;                          // Copy of instruction
     
-    if(instLine == -1)
-    {
+    if(instLine == -1) {
         currentInstructions[num] = -1;
-    }
-    else
-    {
+    } else {
         instruction = (char *) malloc(32);              // Allocate space for instruction
         strcpy(instruction, INSTRUCTIONS[instLine]);    // Make copy of current instruction
         command[num] = strtok(instruction, " ");             // Get command argument from instruction (add, jal, etc.)

@@ -44,10 +44,10 @@ int dest[5] = {};   // Destination register
 int arg1[5] = {};   // Register argument 1
 int arg2[5] = {};   // Register argument 2
 int offset = 0;
-int result = 0;
+int result[5] = {};
 int total =0;
 int num = 0;        // Pipeline instruction counter
-
+int currentInstructions[5] = {-1,-1,-1,-1,-1};
 
 int main(int argc, const char * argv[]) {
     char fileName[50];
@@ -57,7 +57,7 @@ int main(int argc, const char * argv[]) {
     
     //Holds current instructions
     //***Need to write population code***
-    int currentInstructions[5] = {-1,-1,-1,-1,-1};
+    
     int nextStage[5] = {};
     //Indexes current commands
     int next = 0;
@@ -81,6 +81,7 @@ int main(int argc, const char * argv[]) {
     
   
     //***Change bounds on loop***
+    
     while(instLine < length)
     {
         //Make while, use head and tail in the array/iterator/counter
@@ -89,11 +90,14 @@ int main(int argc, const char * argv[]) {
         {
             next = nextStage[num];
             // Start fetchDecode / ALU Ops
+
             //If registers are in use, break
-           if(arg1[num] == dest[(total-1)%5] || arg1[num] == dest[(total-2)%5] || arg2[num] == dest[(total-1)%5]
-                    || arg2[num] == dest[(total-2)%5])
+           if(arg1[num] == dest[(total-1)%5]
+              || arg1[num] == dest[(total-2)%5]
+              || arg2[num] == dest[(total-1)%5]
+              || arg2[num] == dest[(total-2)%5])
             {
-                break;
+                fetch(-1, num);
             }
             
             //Otherwise execute normally
@@ -104,8 +108,7 @@ int main(int argc, const char * argv[]) {
                    fetch(instLine, num);
                     
                 } else if(next == 1) {
-                   decode(instLine);
-                   instLine++;
+                   decode(currentInstructions[num]);
                     
                 } else if (next == 2) {
                    ALU(arg1[num], arg2[num], command[num]);
@@ -239,165 +242,180 @@ void fileProcess(FILE*in_file) {
 void fetch(int instLine, int num) {
     char *instruction;                          // Copy of instruction
     
+    if(instLine == -1)
+    {
+        currentInstructions[num] = -1;
+    }
+    else
+    {
+        instruction = (char *) malloc(32);              // Allocate space for instruction
+        strcpy(instruction, INSTRUCTIONS[instLine]);    // Make copy of current instruction
+        command[num] = strtok(instruction, " ");             // Get command argument from instruction (add, jal, etc.)
+        printf("Current command: %c\n", *command[num]);
     
-    instruction = (char *) malloc(32);              // Allocate space for instruction
-    strcpy(instruction, INSTRUCTIONS[instLine]);    // Make copy of current instruction
-    command[num] = strtok(instruction, " ");             // Get command argument from instruction (add, jal, etc.)
-    printf("Current command: %c\n", *command[num]);
-    
-    free(instruction);
-    next = 1;
+        free(instruction);
+    }
+    next++;
 }
 
 
-void decode(int instLine) {
+void decode(int instLine)
+{
     char *arg;                            // Token for strtok()
     int i = 0;
-    
-    // beq and bne: $s, $t, offset
-    if (   strcmp(command[num], "beq") == 0
-        || strcmp(command[num], "bne") == 0) {
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Find register value for 1st arg
-            if (strcmp(arg, registerArray[i]) == 0) {
-                arg1[num] = registerMemory[i];
-                break;
-            }
-        }
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Find register value for 2nd arg
-            if (strcmp(arg, registerArray[i]) == 0) {
-                arg2[num] = registerMemory[i];
-                break;
-            }
-        }
-        label = (strtok(NULL, " "));    // Set global branch label
-        next = 1;
-    }
-    
-    // add, sub, mult, div, slt: $dest, $arg1, $arg2
-    if (   strcmp(command[num], "add") == 0
-        || strcmp(command[num], "addi") == 0
-        || strcmp(command[num], "sub") == 0
-        || strcmp(command[num], "subi") == 0
-        || strcmp(command[num], "mult")== 0
-        || strcmp(command[num], "div") == 0
-        || strcmp(command[num], "slt") == 0
-        || strcmp(command[num], "sltu") == 0 )
+    if(instLine != -1)
     {
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Get value stored in first register
-            if (strcmp(arg, registerArray[i]) == 0) {
-                dest[num] = i;
-                break;
+        
+        
+        // beq and bne: $s, $t, offset
+        if (   strcmp(command[num], "beq") == 0
+            || strcmp(command[num], "bne") == 0) {
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Find register value for 1st arg
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    arg1[num] = registerMemory[i];
+                    break;
+                }
             }
-        }
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Get value stored in first register
-            if (strcmp(arg, registerArray[i]) == 0) {
-                arg1[num] = registerMemory[i];
-                break;
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Find register value for 2nd arg
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    arg2[num] = registerMemory[i];
+                    break;
+                }
             }
+            label = (strtok(NULL, " "));    // Set global branch label
+            
         }
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Get value stored in second register
-            if (strcmp(arg, registerArray[i]) == 0) {
-                arg2[num] = registerMemory[i];
-                break;
+        
+        // add, sub, mult, div, slt: $dest, $arg1, $arg2
+        else if (   strcmp(command[num], "add") == 0
+            || strcmp(command[num], "addi") == 0
+            || strcmp(command[num], "sub") == 0
+            || strcmp(command[num], "subi") == 0
+            || strcmp(command[num], "mult")== 0
+            || strcmp(command[num], "div") == 0
+            || strcmp(command[num], "slt") == 0
+            || strcmp(command[num], "sltu") == 0 )
+        {
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Get value stored in first register
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    dest[num] = i;
+                    break;
+                }
             }
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Get value stored in first register
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    arg1[num] = registerMemory[i];
+                    break;
+                }
+            }
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Get value stored in second register
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    arg2[num] = registerMemory[i];
+                    break;
+                }
+            }
+            if (i == 32) { arg2[num] = atoi(arg); }    // If arg was immediate (not register), arg2 = immediate value
+            
         }
-        if (i == 32) { arg2[num] = atoi(arg); }    // If arg was immediate (not register), arg2 = immediate value
-        next = 1;
+        
+        // sw and lw: $t, offset($s)
+        else if (   strcmp(command[num], "sw") == 0
+            || strcmp(command[num], "lw") == 0 )
+        {
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Get register INDEX
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    arg1[num] = i;
+                    break;
+                }
+            }
+            offset = atoi( strtok(NULL, "(") );    // Offset
+            arg = strtok(NULL, ")");
+            for (i = 0; i < 32; i++) {                    // Get address from 2nd register, and add offset
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    arg2[num] = registerMemory[i] + offset;
+                    break;
+                }
+            }
+            
+        }
+        
+        // j, jal: target
+        else if (   strcmp(command[num], "j")   == 0
+            || strcmp(command[num], "jal") == 0
+            || strcmp(command[num], "jr")  == 0 )
+        {
+            label = strtok(NULL, " ");    // Get label for if branch is true, save globally
+            
+        }
+        
+        else  if ( strcmp(command, "slt") == 0 )
+        {
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Get value stored in first register
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    dest[num] = i;
+                    break;
+                }
+            }
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Get value stored in first register
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    arg1[num] = registerMemory[i];
+                    break;
+                }
+            }
+            arg = strtok(NULL, " ");
+            for (i = 0; i < 32; i++) {            // Get value stored in second register
+                if (strcmp(arg, registerArray[i]) == 0) {
+                    arg2[num] = registerMemory[i];
+                    break;
+                }
+            }
+            if (i == 32) { arg2[num] = atoi(arg); }    // If arg was immediate (not register), arg2 = immediate value
+            
+        }
     }
+    next++;
     
-    // sw and lw: $t, offset($s)
-    if (   strcmp(command[num], "sw") == 0
-        || strcmp(command[num], "lw") == 0 )
-    {
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Get register INDEX
-            if (strcmp(arg, registerArray[i]) == 0) {
-                arg1[num] = i;
-                break;
-            }
-        }
-        offset = atoi( strtok(NULL, "(") );    // Offset
-        arg = strtok(NULL, ")");
-        for (i = 0; i < 32; i++) {                    // Get address from 2nd register, and add offset
-            if (strcmp(arg, registerArray[i]) == 0) {
-                arg2[num] = registerMemory[i] + offset;
-                break;
-            }
-        }
-        next = 2;
-    }
-    
-    // j, jal: target
-    if (   strcmp(command[num], "j")   == 0
-        || strcmp(command[num], "jal") == 0
-        || strcmp(command[num], "jr")  == 0 )
-    {
-        label = strtok(NULL, " ");    // Get label for if branch is true, save globally
-        next = 2;
-    }
-    
-    if ( strcmp(command, "slt") == 0 )
-    {
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Get value stored in first register
-            if (strcmp(arg, registerArray[i]) == 0) {
-                dest[num] = i;
-                break;
-            }
-        }
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Get value stored in first register
-            if (strcmp(arg, registerArray[i]) == 0) {
-                arg1[num] = registerMemory[i];
-                break;
-            }
-        }
-        arg = strtok(NULL, " ");
-        for (i = 0; i < 32; i++) {            // Get value stored in second register
-            if (strcmp(arg, registerArray[i]) == 0) {
-                arg2[num] = registerMemory[i];
-                break;
-            }
-        }
-        if (i == 32) { arg2[num] = atoi(arg); }    // If arg was immediate (not register), arg2 = immediate value
-        next = 1;
-    }
 }
 
 
 int ALU(int arg1, int arg2, char * command)
+{
+    if(currentInstructions[num] != -1)
     {
         //Add
         if(strcmp(command, "add") == 0 || strcmp(command, "addi") == 0)
         {
-            result = arg1 + arg2;
-            next = 3;
+            result[num] = arg1 + arg2;
+            next ++;
             return 0;
         }
         //Sub
         else if(strcmp(command, "sub") == 0 || strcmp(command, "subi") == 0)
         {
-            result = arg1 - arg2;
-            next = 3;
+            result[num] = arg1 - arg2;
+            next ++;
             return 0;
         }
         //Multiplication
         else if( strcmp(command, "mult") == 0 || strcmp(command, "multi") == 0)
         {
-            result = arg1 * arg2;
-            next = 3;
+            result[num] = arg1 * arg2;
+            next ++;
             return 0;
         }
         //Division
         else if(strcmp(command, "div") == 0 || strcmp(command, "divi") == 0)
         {
-            result = arg1/arg2;
-            next = 3;
+            result[num] = arg1/arg2;
+            next++;
             return 0;
         }
         //Branch if equal
@@ -463,8 +481,10 @@ int ALU(int arg1, int arg2, char * command)
             next = 0;
             return 0;
         }
-        return 1;
     }
+    next++;
+        return 1;
+}
 
 
 //SW/LW

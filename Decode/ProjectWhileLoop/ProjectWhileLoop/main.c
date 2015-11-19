@@ -45,8 +45,9 @@ int arg1[5] = {};   // Register argument 1
 int arg2[5] = {};   // Register argument 2
 int offset = 0;
 int result = 0;
-int total =0;
+int total = 0;
 int num = 0;        // Pipeline instruction counter
+int currentInstructions[5] = {-1,-1,-1,-1,-1};
 
 
 int main(int argc, const char * argv[]) {
@@ -57,7 +58,7 @@ int main(int argc, const char * argv[]) {
     
     //Holds current instructions
     //***Need to write population code***
-    int currentInstructions[5] = {-1,-1,-1,-1,-1};
+
     int nextStage[5] = {};
     //Indexes current commands
     int next = 0;
@@ -93,7 +94,11 @@ int main(int argc, const char * argv[]) {
            if(arg1[num] == dest[(total-1)%5] || arg1[num] == dest[(total-2)%5] || arg2[num] == dest[(total-1)%5]
                     || arg2[num] == dest[(total-2)%5])
             {
-                break;
+                if (next == 0) {
+                    fetch(-1, num);
+                } else if (next == 1) {
+                    decode(-1);
+                }
             }
             
             //Otherwise execute normally
@@ -103,7 +108,7 @@ int main(int argc, const char * argv[]) {
                    //***I dont know if these are the correct arguments or not***
                    fetch(instLine, num);
                     
-                } else if(next == 1) {
+                } else if (next == 1) {
                    decode(instLine);
                    instLine++;
                     

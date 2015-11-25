@@ -22,6 +22,7 @@ void fileProcess(FILE*);
 int ALU(int, int, char *);
 void fetch(int, int);
 void decode(int);
+int checkCache(int);
 int registerWriteBack(int targetRegister, int value);
 int memoryCommands(char * command, int targetRegister, int memoryIndex);
 
@@ -38,7 +39,7 @@ int length = sizeof(INSTRUCTIONS) / sizeof(INSTRUCTIONS[0]);
 int next = 0;       // 0 = fetch 1 = Decode, 2 = ALU, 3 = regWriteBack, 4 = memCommands
 char *command[5];   // Ie. add, jal, beq, mult, etc. of instruction
 int instLine = 0;   // Index counter for accessing INSTRUCTIONS
-int dest[5] = {};   // Destination register
+int dest[5] = {-1,-1,-1,-1,-1};   // Destination register
 int arg1[5] = {};   // Register argument 1
 int arg2[5] = {};   // Register argument 2
 int offset = 0;
@@ -46,9 +47,14 @@ int result[5] = {};
 int total = 0;
 int num = 0;        // Pipeline instruction counter
 int currentInstructions[5] = {-1,-1,-1,-1,-1};
+int cache [12][5]= { }; // cache
 
 int main(int argc, const char * argv[]) {
     char fileName[50];
+    for(int i = 0; i < 12; i++)
+    {
+        cache[i][0] = -1;
+    }
     
     //Counts each clock cycle
     int clockCounter = 0;
@@ -88,6 +94,8 @@ int main(int argc, const char * argv[]) {
             // Start fetchDecode / ALU Ops
 
             //If registers are in use, send a bubble
+        if(dest[(total-1)%5] != -1 || dest[(total-2)%5] != -1)
+        {
            if(arg1[num] == dest[(total-1)%5]
               || arg1[num] == dest[(total-2)%5]
               || arg2[num] == dest[(total-1)%5]
@@ -95,6 +103,7 @@ int main(int argc, const char * argv[]) {
            {
                 fetch(-1, num);
            }
+        }
             
             //Otherwise execute normally
            else {
@@ -247,6 +256,7 @@ void fetch(int instLine, int num) {
         strcpy(instruction, INSTRUCTIONS[instLine]);    // Make copy of current instruction
         command[num] = strtok(instruction, " ");             // Get command argument from instruction (add, jal, etc.)
         printf("Current command: %c\n", *command[num]);
+        currentInstructions[num] = instLine;
     
         free(instruction);
     }
@@ -474,13 +484,14 @@ int memoryCommands(char * command, int targetRegister, int memoryIndex)
             if(strcmp(command, "sw") == 0)
             {
                 int index = arg2[num]/4;
+               
                 mainMemory[index] = registerMemory[arg1[num]];
                 
             }
             else if(strcmp(command, "lw") == 0)
             {
                 int index = arg2[num]/4;
-                registerMemory[arg1[num]] =  mainMemory[index];
+                registerMemory[arg1[num]] =  checkCache(index);
             }
             else if(strcmp(command, "j") == 0) {
                 for(int i = 0; i < 10; i++)
@@ -525,3 +536,52 @@ int registerWriteBack(int targetRegister, int value)
             next = 0;
             return 0;
     }
+int checkCache(int index)
+{
+    int tag = index/4;              // get tag of index
+    int num = index%4 + 1;          // get 1st word location in cache (+1 accomodates for tag being 1st elem in row)
+    int transfer = 0;               // data being transferred from mainMem to cache
+    int i = 0;
+    int j = 0;
+    
+    // Search to see if tag exists. If so, return data at corresponding index
+    for(i = 0; i < 12; i++)
+    {
+        if(tag == cache[i][0])
+        {
+            return cache[i][num];
+        }
+    }
+    
+    // find next empty tag location
+    while ( cache[i][0] != -1 ) { i++; }
+    // for all words at tag location,
+    for (j = 0; j < 4; j++) {
+        transfer = mainMemory[ ( index - num - 1 + j )];    // get corresponding data from mainMemory
+        cache[i][num] = transfer;                           // save data to cache
+    }
+    
+    return -1;
+}
+
+int writeCache(int index, int value)
+{
+    int tag = index/4;              // get tag of index
+    int num = index%4 + 1;          // get 1st word location in cache (+1 accomodates for tag being 1st elem in row)
+    int i = 0;
+    int j = 0;
+    
+    // Search to see if tag exists. If so, return data at corresponding index
+    for(i = 0; i < 12; i++)
+    {
+        if(tag == cache[i][0])
+        {
+            cache[i][num] = value;
+            mainMemory[index] = value;
+            return 1;
+        }
+        
+    }
+    mainMemory[index] = value;
+    return -1;
+}

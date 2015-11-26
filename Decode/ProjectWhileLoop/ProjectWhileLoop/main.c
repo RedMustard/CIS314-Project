@@ -48,6 +48,7 @@ int total = 0;
 int num = 0;        // Pipeline instruction counter
 int currentInstructions[5] = {-1,-1,-1,-1,-1};
 int cache [12][5]= { }; // cache
+int cacheAccessArray[12] = {};
 
 int main(int argc, const char * argv[]) {
     char fileName[50];
@@ -131,17 +132,19 @@ int main(int argc, const char * argv[]) {
                 total++;
                 //Unifying index for all current instructions and corresponding arrays
                 num = total%5;
-                printf("%d", clockCounter);
+//                printf("%d", clockCounter);
                
             } // End else
         } // End for
         
         //Increment again to start at proper index for next iteration
         total++;
+        currentInstructions[num] = instLine++;
         num = total%5;
-        instLine++;
+        
         //Increment counter
         clockCounter++;
+        
     }
     
     return 0;
@@ -246,17 +249,17 @@ void fileProcess(FILE*in_file) {
 } // End fileParse
 
 
-void fetch(int instLine, int num) {
+void fetch(int instLine2, int num) {
     char *instruction;                          // Copy of instruction
     
-    if(instLine == -1) {
+    if(currentInstructions[num] == -1) {
         currentInstructions[num] = -1;
     } else {
         instruction = (char *) malloc(32);              // Allocate space for instruction
-        strcpy(instruction, INSTRUCTIONS[instLine]);    // Make copy of current instruction
+        strcpy(instruction, INSTRUCTIONS[currentInstructions[num]]);    // Make copy of current instruction
         command[num] = strtok(instruction, " ");             // Get command argument from instruction (add, jal, etc.)
-        printf("Current command: %c\n", *command[num]);
-        currentInstructions[num] = instLine;
+        printf("Current command: %s\n", command[num]);
+//        currentInstructions[num] = instLine;
     
         free(instruction);
     }
@@ -543,21 +546,41 @@ int checkCache(int index)
     int transfer = 0;               // data being transferred from mainMem to cache
     int i = 0;
     int j = 0;
+    int leastAccessed = 0;
     
     // Search to see if tag exists. If so, return data at corresponding index
     for(i = 0; i < 12; i++)
     {
         if(tag == cache[i][0])
         {
-            return cache[i][num];
+            cacheAccessArray[i]++;          // Add 1 to access array to indicate it has been accessed once more
+            return cache[i][num];           // Return corresponding word value
         }
     }
     
+    // If tag wasn't found...
+    i = 0;                                  // Re-initialize i
     // find next empty tag location
-    while ( cache[i][0] != -1 ) { i++; }
-    // for all words at tag location,
-    for (j = 0; j < 4; j++) {
-        transfer = mainMemory[ ( index - num - 1 + j )];    // get corresponding data from mainMemory
+    while ( cache[i][0] != -1) {
+        i++;
+        if (i == 12) { break; } // If no empty tags
+    }
+    
+    // If no empty tags found...
+    if (i == 12) {
+        leastAccessed = cacheAccessArray[0];                            // i = new tag index
+        for (j = 1; j < 12; j++) {
+            if (leastAccessed > cacheAccessArray[j]) {
+                leastAccessed = cacheAccessArray[j];        // Find tag with fewest access "hits"
+                i = j;                                      // save that tag index for replacement
+            }
+        }
+        cacheAccessArray[i] = 0;                            // Initialize new tag's access count
+    }
+    // If empty tag location exists/once least accessed tag has been found...
+    cache[i][0] = tag;                                      // Save new tag at location
+    for (j = 0; j < 4; j++) {                               // Loop to store new words from MainMemory
+        transfer = mainMemory[ ( index - ( index % 4 ) + j ) ];   // get data from mainMemory
         cache[i][num] = transfer;                           // save data to cache
     }
     
@@ -569,13 +592,13 @@ int writeCache(int index, int value)
     int tag = index/4;              // get tag of index
     int num = index%4 + 1;          // get 1st word location in cache (+1 accomodates for tag being 1st elem in row)
     int i = 0;
-    int j = 0;
     
     // Search to see if tag exists. If so, return data at corresponding index
     for(i = 0; i < 12; i++)
     {
         if(tag == cache[i][0])
         {
+            cacheAccessArray[i]++;
             cache[i][num] = value;
             mainMemory[index] = value;
             return 1;
@@ -585,3 +608,4 @@ int writeCache(int index, int value)
     mainMemory[index] = value;
     return -1;
 }
+
